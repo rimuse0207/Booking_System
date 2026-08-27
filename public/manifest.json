@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "디에이치케이솔루션",
+  "name": "회의실예약 프로그램",
   "icons": [
     {
       "src": "favicon.ico",
