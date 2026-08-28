@@ -126,6 +126,7 @@ export const useReservation = () => {
       setLoading(true);
       try {
         const dateStr = moment(currentDate).format("YYYY-MM-DD");
+        await actions.LoginTokenChecking();
 
         const [roomsRes, reservationsRes] = await Promise.all([
           Request_Get_Axios("/RoomApp/rooms", {

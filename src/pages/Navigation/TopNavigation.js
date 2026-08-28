@@ -15,9 +15,9 @@ export function TopMenu() {
   );
 
   const MENUS = [
-    { name: "회의실 예약", path: "/" },
-    { name: "식단표", path: "/Today_Food" },
-    { name: "자리배치도", path: "/FloorLayout" },
+    { name: "회의실 예약", path: "/", accessCompany: ["ALL"] },
+    { name: "식단표", path: "/Today_Food", accessCompany: ["ALL"] },
+    { name: "자리배치도", path: "/FloorLayout", accessCompany: ["DHKS"] },
   ];
 
   const handleLogout = () => {
@@ -34,8 +34,11 @@ export function TopMenu() {
       <Logo onClick={() => navigate("/")}>{COMPANY_NAME}</Logo>
 
       <NavLinks>
-        {MENUS.map((menu) => {
-          // 💡 핵심 수정: 메인 경로("/")는 정확히 일치할 때만 활성화하고, 나머지는 하위 경로까지 포함하여 활성화
+        {MENUS.filter(
+          (item) =>
+            item.accessCompany.includes("ALL") ||
+            item.accessCompany.includes(LoginInfo?.company),
+        ).map((menu) => {
           const isActive =
             menu.path === "/"
               ? location.pathname === "/"

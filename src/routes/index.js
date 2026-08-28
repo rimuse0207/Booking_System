@@ -18,30 +18,35 @@ const RouterMainPage = () => {
   const User_Info = useSelector(
     (state) => state.Login_Info_Reducer_State.Login_Info,
   );
+
   const [RouterInfo, setRouterInfo] = useState([
     {
       path: "/Login",
       element: <LoginPage></LoginPage>,
       withAuthorization: false,
       withAdminAuthorization: false,
+      accessCompany: ["ALL"],
     },
     {
       path: "/",
       element: <ReservationBoard></ReservationBoard>,
       withAuthorization: false,
       withAdminAuthorization: false,
+      accessCompany: ["ALL"],
     },
     {
       path: "/Today_Food",
       element: <MealPlan></MealPlan>,
       withAuthorization: false,
       withAdminAuthorization: false,
+      accessCompany: ["ALL"],
     },
     {
       path: "/FloorLayout",
       element: <FloorLayout></FloorLayout>,
       withAuthorization: true,
       withAdminAuthorization: false,
+      accessCompany: ["DHKS"],
     },
 
     {
@@ -49,13 +54,18 @@ const RouterMainPage = () => {
       element: <Navigate to="/Home"></Navigate>,
       withAuthorization: true,
       withAdminAuthorization: false,
+      accessCompany: ["ALL"],
     },
   ]);
 
   return (
     <BrowserRouter>
       <Routes>
-        {RouterInfo.map((route) => {
+        {RouterInfo.filter(
+          (item) =>
+            item.accessCompany.includes("ALL") ||
+            item.accessCompany.includes(User_Info?.company),
+        ).map((route) => {
           return (
             <Route
               key={route.path}

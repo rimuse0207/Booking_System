@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import styled from "styled-components";
 import { minsToTime } from "../../constants/BookingReservation/reservation";
 
@@ -29,6 +29,14 @@ export function ReservationModal({ state, actions }) {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+  const subjectInputRef = useRef(null);
+
+  // 2. 컴포넌트 마운트 시 포커스 및 텍스트 전체 선택
+  useEffect(() => {
+    if (subjectInputRef.current) {
+      subjectInputRef.current.select();
+    }
+  }, []);
 
   return (
     <ModalOverlay onClick={() => setIsModalOpen(false)}>
@@ -42,10 +50,11 @@ export function ReservationModal({ state, actions }) {
           <FormGroup>
             <Label>회의 제목</Label>
             <Input
+              ref={subjectInputRef}
               type="text"
-              name="title"
+              name="subject"
               placeholder="예: 주간 회의"
-              value={modalForm.title || ""}
+              value={modalForm.subject || ""}
               onChange={handleFormChange}
               autoFocus
             />
@@ -96,7 +105,7 @@ export function ReservationModal({ state, actions }) {
               )}
             </CheckboxLabel>
 
-            <CheckboxLabel>
+            {/* <CheckboxLabel>
               <input
                 type="checkbox"
                 name="sendEmail"
@@ -104,7 +113,7 @@ export function ReservationModal({ state, actions }) {
                 onChange={handleFormChange}
               />
               <span>참석자 및 관련자에게 메일 발송</span>
-            </CheckboxLabel>
+            </CheckboxLabel> */}
           </ToggleGroup>
 
           {modalForm.sendEmail && (
