@@ -1,5 +1,5 @@
 // src/hooks/useReservation.js
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import moment from "moment";
 import {
   SLOT_WIDTH,
@@ -27,6 +27,10 @@ export const useReservation = () => {
   // --- 1. 상태(State) 선언 ---
   const [SelectBasicTitle, setSelectBasicTitle] = useState("Company_Room");
   const [currentDate, setCurrentDate] = useState(new Date());
+
+  // 💡 층수 필터 상태 추가 (기본값: ALL)
+  const [floorFilter, setFloorFilter] = useState("ALL");
+
   const [rooms, setRooms] = useState([]);
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -47,7 +51,25 @@ export const useReservation = () => {
     sendEmail: false,
   });
 
-  // const currentUser = { id: "sjyoo@dhk.co.kr", name: "유성재" };
+  // --- 💡 1-1. 층수 및 예외(차량) 필터링 로직 (useMemo 적용 최적화) ---
+  const filteredRooms = useMemo(() => {
+    return rooms.filter((room) => {
+      // 1) 전체 보기면 무조건 통과
+      if (floorFilter === "ALL") return true;
+
+      // 이름 속성 매핑 (DB 스키마 구조에 맞게 안전하게 속성 참조)
+      const roomName = room.brity_works_room_info_name;
+
+      // 2) 법인차량 예외 처리 (이름에 '차량'이 포함되어 있다면 무조건 통과)
+      if (roomName.includes("차량")) return true;
+
+      // 3) 2F / 6F 필터 선택 시 해당 문자로 시작하는 방만 통과
+      if (floorFilter === "2F" && roomName.startsWith("2F")) return true;
+      if (floorFilter === "6F" && roomName.startsWith("6F")) return true;
+
+      return false;
+    });
+  }, [rooms, floorFilter]);
 
   // --- 2. 모달 열기/닫기 및 흐름 제어 액션 ---
 
@@ -85,7 +107,8 @@ export const useReservation = () => {
       const rStart = getMinsFromDateStr(reservation.startTime);
       const rEnd = getMinsFromDateStr(reservation.endTime);
 
-      const targetRoomIndex = rooms.findIndex(
+      // 💡 rooms 대신 filteredRooms 배열에서 인덱스 탐색
+      const targetRoomIndex = filteredRooms.findIndex(
         (r) => r.brity_works_room_info_targetId === reservation.roomId,
       );
 
@@ -97,7 +120,7 @@ export const useReservation = () => {
         originalData: reservation,
       });
     },
-    [closeDetailModal, rooms],
+    [closeDetailModal, filteredRooms],
   );
 
   const confirmDragEdit = useCallback(() => {
@@ -158,7 +181,10 @@ export const useReservation = () => {
     console.log("modalForm", modalForm);
     const finalStartMin = modalForm.isAllDay ? 0 : draft.startMin;
     const finalEndMin = modalForm.isAllDay ? 24 * 60 : draft.endMin;
-    const targetRoomId = rooms[draft.roomIndex]?.brity_works_room_info_targetId;
+
+    // 💡 rooms 대신 filteredRooms 에서 인덱스로 타겟 ID 조회
+    const targetRoomId =
+      filteredRooms[draft.roomIndex]?.brity_works_room_info_targetId;
 
     const newReservationData = {
       roomId: targetRoomId,
@@ -194,7 +220,7 @@ export const useReservation = () => {
       console.error("신규 예약 등록 실패:", error);
       showToast("예약 저장 중 오류가 발생했습니다.", "error");
     }
-  }, [draft, modalForm, currentDate, rooms]);
+  }, [draft, modalForm, currentDate, filteredRooms, LoginInfo]);
 
   // 기존 예약 수정 API 호출
   const submitEditReservation = useCallback(
@@ -291,12 +317,14 @@ export const useReservation = () => {
       if (!LoginChecking) {
         return showToast("로그인 이후 예약이 가능합니다.", "error");
       }
-      console.log(dragState, isDraggingRef.current, isModalOpen);
       if (dragState || isDraggingRef.current || isModalOpen) return;
 
       const startMin = hour * 60 + (isSecondHalf ? 30 : 0);
       const endMin = startMin + 30;
-      const targetRoomId = rooms[roomIndex]?.brity_works_room_info_targetId;
+
+      // 💡 rooms 대신 filteredRooms 에서 타겟 ID 조회
+      const targetRoomId =
+        filteredRooms[roomIndex]?.brity_works_room_info_targetId;
 
       const isOccupied = reservations.some((r) => {
         if (r.roomId !== targetRoomId) return false;
@@ -308,7 +336,7 @@ export const useReservation = () => {
 
       if (!isOccupied) setDraft({ roomIndex, startMin, endMin });
     },
-    [dragState, isModalOpen, reservations, rooms],
+    [dragState, isModalOpen, reservations, filteredRooms],
   );
 
   // 드래그 시작 시 한계선 계산
@@ -317,7 +345,9 @@ export const useReservation = () => {
       e.stopPropagation();
       e.preventDefault();
 
-      const targetRoomId = rooms[roomIndex]?.brity_works_room_info_targetId;
+      // 💡 rooms 대신 filteredRooms 에서 타겟 ID 조회
+      const targetRoomId =
+        filteredRooms[roomIndex]?.brity_works_room_info_targetId;
 
       // 현재 수정 중인 자기 자신(editId)은 충돌 블록에서 제외!
       const roomRes = reservations.filter(
@@ -347,14 +377,17 @@ export const useReservation = () => {
         maxBound,
       });
     },
-    [draft, reservations, rooms],
+    [draft, reservations, filteredRooms],
   );
 
   return {
     state: {
       SelectBasicTitle,
       currentDate,
-      rooms,
+
+      floorFilter, // 💡 컴포넌트(Header)에서 사용할 필터 상태
+
+      rooms: filteredRooms, // 💡 컴포넌트는 원본 rooms가 아닌 필터링된 rooms를 렌더링하도록 덮어씌움
       reservations,
       draft,
       dragState,
@@ -370,6 +403,9 @@ export const useReservation = () => {
     actions: {
       setSelectBasicTitle,
       setCurrentDate,
+
+      setFloorFilter, // 💡 컴포넌트(Header)에서 필터값을 바꿀 함수
+
       setDraft,
       setIsModalOpen,
       setModalForm,
@@ -385,9 +421,9 @@ export const useReservation = () => {
       confirmDragEdit,
 
       // 실제 서버 데이터 변경 처리
-      submitReservation, // 신규 생성
-      submitEditReservation, // 기존 변경
-      deleteReservation, // 삭제
+      submitReservation,
+      submitEditReservation,
+      deleteReservation,
     },
   };
 };

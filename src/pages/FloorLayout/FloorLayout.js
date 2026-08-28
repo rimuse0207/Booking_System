@@ -1086,9 +1086,10 @@ const UserDept = styled.div`
   letter-spacing: -0.5px;
 `;
 const UserName = styled.div`
-  font-size: 0.75rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #334155;
+  text-align: center;
 `;
 
 const RoomBox = styled.div`

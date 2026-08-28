@@ -13,6 +13,7 @@ import LoginPage from "../pages/Login/LoginPage";
 import ReservationBoard from "../pages/BookingReservation/ReservationBoard";
 import MealPlan from "../pages/MealPlan/MealPlan";
 import FloorLayout from "../pages/FloorLayout/FloorLayout";
+import Schedule from "../pages/Schedule/Schedule";
 
 const RouterMainPage = () => {
   const User_Info = useSelector(
@@ -44,6 +45,13 @@ const RouterMainPage = () => {
     {
       path: "/FloorLayout",
       element: <FloorLayout></FloorLayout>,
+      withAuthorization: true,
+      withAdminAuthorization: false,
+      accessCompany: ["DHKS"],
+    },
+    {
+      path: "/My_Pims",
+      element: <Schedule></Schedule>,
       withAuthorization: true,
       withAdminAuthorization: false,
       accessCompany: ["DHKS"],

@@ -18,6 +18,7 @@ export function TopMenu() {
     { name: "회의실 예약", path: "/", accessCompany: ["ALL"] },
     { name: "식단표", path: "/Today_Food", accessCompany: ["ALL"] },
     { name: "자리배치도", path: "/FloorLayout", accessCompany: ["DHKS"] },
+    { name: "나의 일정", path: "/My_Pims", accessCompany: ["DHKS"] },
   ];
 
   const handleLogout = () => {

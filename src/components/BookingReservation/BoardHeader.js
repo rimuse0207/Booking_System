@@ -1,7 +1,14 @@
+// src/components/BookingReservation/BoardHeader.jsx
 import React from "react";
 import styled from "styled-components";
 
-export function BoardHeader({ date, setDate }) {
+export function BoardHeader({
+  date,
+  setDate,
+  floorFilter,
+  setFloorFilter,
+  SelectBasicTitle,
+}) {
   // 날짜 이동 핸들러 (이전날/다음날)
   const handlePrevDay = () => {
     const prev = new Date(date);
@@ -33,7 +40,37 @@ export function BoardHeader({ date, setDate }) {
     <Header>
       <HeaderLeft>
         <Badge>예약 시스템</Badge>
-        <Title>회의실 예약</Title>
+        <Title>
+          {SelectBasicTitle === "Company_Room" ? "회의실" : "법인차량"} 예약
+        </Title>
+
+        {/* 💡 스위칭 느낌의 버튼 그룹(Segmented Control)으로 디자인 변경 */}
+        <FilterGroup>
+          <FilterButton
+            $active={floorFilter === "ALL"}
+            onClick={() => setFloorFilter("ALL")}
+          >
+            전체
+          </FilterButton>
+          {SelectBasicTitle === "Company_Room" ? (
+            <>
+              <FilterButton
+                $active={floorFilter === "2F"}
+                onClick={() => setFloorFilter("2F")}
+              >
+                2층
+              </FilterButton>
+              <FilterButton
+                $active={floorFilter === "6F"}
+                onClick={() => setFloorFilter("6F")}
+              >
+                6층
+              </FilterButton>
+            </>
+          ) : (
+            <></>
+          )}
+        </FilterGroup>
       </HeaderLeft>
 
       <DateController onClick={(e) => e.stopPropagation()}>
@@ -55,7 +92,6 @@ export function BoardHeader({ date, setDate }) {
 }
 
 // --- Styled Components ---
-
 const Header = styled.div`
   display: flex;
   justify-content: space-between;
@@ -87,6 +123,35 @@ const Title = styled.h2`
   font-weight: 700;
   @media (max-width: 768px) {
     font-size: 1.25rem;
+  }
+`;
+
+/* 💡 버튼 그룹 래퍼 스타일 */
+const FilterGroup = styled.div`
+  display: flex;
+  background-color: #f1f5f9;
+  padding: 4px;
+  border-radius: 8px;
+  gap: 4px;
+  margin-left: 12px;
+`;
+
+/* 💡 스위칭 버튼 스타일 */
+const FilterButton = styled.button`
+  background-color: ${(props) => (props.$active ? "#ffffff" : "transparent")};
+  color: ${(props) => (props.$active ? "#0ea5e9" : "#64748b")};
+  box-shadow: ${(props) =>
+    props.$active ? "0 2px 4px rgba(0,0,0,0.05)" : "none"};
+  border: none;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: ${(props) => (props.$active ? "#0ea5e9" : "#334155")};
   }
 `;
 

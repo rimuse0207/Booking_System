@@ -1,13 +1,13 @@
-// src/components/TimeGrid.jsx
 import React from "react";
 import styled from "styled-components";
 import {
-  ROOMS,
   HOURS,
   SLOT_WIDTH,
   MINUTE_WIDTH,
   timeToMins,
   minsToTime,
+  timeToMinsEndData,
+  timeToMinsStartData,
 } from "../../constants/BookingReservation/reservation";
 import moment from "moment";
 
@@ -18,17 +18,18 @@ export function TimeGrid({ state, actions }) {
     draft,
     dragState,
     isModalOpen,
-    rooms,
+    rooms, // 💡 훅에서 이미 필터링된 방 목록
     LoginInfo,
+    currentDate,
   } = state;
   const {
     handleSlotClick,
     handleDragStart,
     setDraft,
-    submitReservation,
     openReservationModal,
     confirmDragEdit,
     setSelectBasicTitle,
+    setFloorFilter,
   } = actions;
 
   const getBoxStyleByMins = (startMin, endMin) => ({
@@ -54,13 +55,15 @@ export function TimeGrid({ state, actions }) {
     <BoardWrapper $isDragging={!!dragState}>
       <GridHeader>
         <RoomCorner>
-          {/* 💡 투박한 기본 select 대신 커스텀 스타일이 적용된 CategorySelect 사용 */}
           <CategorySelect
             value={SelectBasicTitle}
-            onChange={(e) => setSelectBasicTitle(e.target.value)}
+            onChange={(e) => {
+              setSelectBasicTitle(e.target.value);
+              setFloorFilter("ALL");
+            }}
           >
             <option value={"Company_Room"}>회의실</option>
-            {LoginInfo.company === "DHKS" && (
+            {LoginInfo?.company === "DHKS" && (
               <option value={"Company_Car"}>법인차량</option>
             )}
           </CategorySelect>
@@ -80,7 +83,7 @@ export function TimeGrid({ state, actions }) {
 
       <GridBody>
         {rooms.map((room, roomIdx) => (
-          <RoomRow key={room.brity_works_room_info_userId}>
+          <RoomRow key={room.brity_works_room_info_userId || roomIdx}>
             <RoomLabel>{room.brity_works_room_info_name}</RoomLabel>
 
             <TimelineArea $isActive={draft && draft.roomIndex === roomIdx}>
@@ -114,28 +117,52 @@ export function TimeGrid({ state, actions }) {
                 .map((res) => {
                   const isMine = res.ownerEmail === LoginInfo?.id;
 
+                  const startMin =
+                    res.allDayYn === "Y"
+                      ? 0
+                      : timeToMinsStartData(res.startTime, currentDate);
+                  const endMin =
+                    res.allDayYn === "Y"
+                      ? 24 * 60
+                      : timeToMinsEndData(res.endTime, currentDate);
+
+                  if (startMin >= endMin) return null;
+
+                  const resStart = moment(res.startTime);
+                  const resEnd = moment(res.endTime);
+                  const isMultiDay = !resStart.isSame(resEnd, "day");
+
+                  let displayTime =
+                    res.allDayYn === "Y"
+                      ? ` ~ ${moment(resEnd).format("MM. DD")}`
+                      : isMultiDay
+                        ? `${resStart.format("MM.DD HH:mm")} - ${resEnd.format("MM.DD HH:mm")}`
+                        : `${resStart.format("HH:mm")} - ${resEnd.format("HH:mm")}`;
+
+                  // 💡 6시간(360분) 이상이면 중앙 정렬
+                  const isLongReservation =
+                    res.allDayYn === "Y" || endMin - startMin >= 360;
+
                   return (
                     <ReservationBox
                       key={res.uid}
                       $isMine={isMine}
-                      style={getBoxStyleByMins(
-                        timeToMins(moment(res.startTime).format("HH:mm")),
-                        timeToMins(moment(res.endTime).format("HH:mm")),
-                      )}
+                      style={getBoxStyleByMins(startMin, endMin)}
                       onClick={(e) => {
                         e.stopPropagation();
                         actions.handleReservationClick(res);
                       }}
-                      $TextCenter={res.allDayYn === "Y"}
+                      $TextCenter={isLongReservation}
                     >
-                      <BoxTitle $isMine={isMine}>{res.subject}</BoxTitle>
+                      <BoxTitle
+                        $isMine={isMine}
+                        $TextCenter={isLongReservation}
+                      >
+                        {res.subject}
+                      </BoxTitle>
                       <BoxUser $isMine={isMine}>{res.ownerName}</BoxUser>
-                      <BoxFooter>
-                        <BoxTime $isMine={isMine}>
-                          {res.allDayYn === "Y"
-                            ? "종일"
-                            : `${moment(res.startTime).format("HH:mm")} - ${moment(res.endTime).format("HH:mm")}`}
-                        </BoxTime>
+                      <BoxFooter $TextCenter={isLongReservation}>
+                        <BoxTime $isMine={isMine}>{displayTime}</BoxTime>
                       </BoxFooter>
                     </ReservationBox>
                   );
@@ -247,9 +274,8 @@ const RoomCorner = styled.div`
   z-index: 40;
 `;
 
-/* 💡 추가된 카테고리 셀렉트 박스 디자인 */
 const CategorySelect = styled.select`
-  appearance: none; /* 브라우저 기본 화살표 제거 */
+  appearance: none;
   width: 85%;
   padding: 8px 28px 8px 12px;
   font-size: 0.9rem;
@@ -262,14 +288,10 @@ const CategorySelect = styled.select`
   outline: none;
   transition: all 0.2s ease;
   font-family: inherit;
-
-  /* 💡 아이콘 대신 순수 CSS(인라인 SVG)를 사용하여 깔끔한 화살표 구현 */
   background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
   background-repeat: no-repeat;
   background-position: right 8px center;
   background-size: 14px;
-
-  /* 긴 글씨 방지 */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -283,7 +305,6 @@ const CategorySelect = styled.select`
     box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.15);
   }
 
-  /* 모바일(80px 너비)일 때 안 깨지도록 미세 조정 */
   @media (max-width: 768px) {
     width: 90%;
     padding: 6px 20px 6px 6px;
@@ -406,6 +427,7 @@ const HalfSlot = styled.div`
   }
 `;
 
+// 💡 Flex 속성 동적 변경 (가운데 정렬)
 const ReservationBox = styled.div`
   position: absolute;
   top: 8px;
@@ -420,10 +442,13 @@ const ReservationBox = styled.div`
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   z-index: 10;
   transition: all 0.2s ease;
+
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  text-align: ${(props) => (props.$TextCenter ? "center" : "")};
+  justify-content: ${(props) =>
+    props.$TextCenter ? "center" : "space-between"};
+  align-items: ${(props) => (props.$TextCenter ? "center" : "flex-start")};
+  gap: ${(props) => (props.$TextCenter ? "4px" : "0")};
 
   &:hover {
     transform: translateY(-2px);
@@ -436,19 +461,25 @@ const ReservationBox = styled.div`
   }
 `;
 
+// 💡 넓이 100% 및 텍스트 정렬 변경
 const BoxTitle = styled.div`
-  font-size: 0.7rem;
+  font-size: 0.75rem;
   font-weight: 700;
   color: ${(props) => (props.$isMine ? "#3730A3" : "#0369a1")};
   white-space: nowrap;
   text-overflow: ellipsis;
   overflow: hidden;
+  width: 100%;
+  text-align: ${(props) => (props.$TextCenter ? "center" : "left")};
 `;
 
+// 💡 텍스트가 중앙에 올 때는 space-between 해제
 const BoxFooter = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: ${(props) =>
+    props.$TextCenter ? "center" : "space-between"};
   align-items: center;
+  width: 100%;
 `;
 
 const BoxTime = styled.div`
@@ -459,7 +490,7 @@ const BoxTime = styled.div`
 `;
 
 const BoxUser = styled.div`
-  font-size: 0.6rem;
+  font-size: 0.65rem;
   color: ${(props) => (props.$isMine ? "#4F46E5" : "#38bdf8")};
   white-space: nowrap;
   background: #ffffff;
@@ -467,6 +498,7 @@ const BoxUser = styled.div`
   border-radius: 4px;
   border: 1px solid ${(props) => (props.$isMine ? "#C7D2FE" : "#e0f2fe")};
   overflow: hidden;
+  display: inline-block;
   @media (max-width: 768px) {
     display: none;
   }

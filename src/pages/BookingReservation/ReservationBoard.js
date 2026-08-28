@@ -1,4 +1,3 @@
-// src/pages/ReservationBoard.jsx
 import React, { useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useReservation } from "../../hooks/BookingReservation/useReservation";
@@ -10,30 +9,12 @@ import { TimeGrid } from "../../components/BookingReservation/TimeGrid";
 import { ReservationDetailModal } from "../../components/BookingReservation/ReservationDetailModal";
 import { ReservationEditModal } from "../../components/BookingReservation/ReservationEditorModal";
 
-const INITIAL_DATA = [
-  {
-    id: 1,
-    roomIndex: 0,
-    title: "주간 업무 보고",
-    user: "관리자",
-    start: "09:30",
-    end: "11:00",
-  },
-  {
-    id: 2,
-    roomIndex: 2,
-    title: "인프라 점검",
-    user: "김철수",
-    start: "13:00",
-    end: "16:30",
-  },
-];
-
 export default function ReservationBoard() {
-  const { state, actions } = useReservation(INITIAL_DATA);
+  // 💡 데이터 통신 및 필터링 등 모든 로직은 훅이 담당
+  const { state, actions } = useReservation();
   const scrollRef = useRef(null);
 
-  // 현재 시간 스크롤 로직 (UI 영역이므로 컴포넌트에 유지)
+  // 현재 시간으로 스크롤 이동
   useEffect(() => {
     if (scrollRef.current) {
       const now = new Date();
@@ -55,13 +36,17 @@ export default function ReservationBoard() {
       <TopMenu />
 
       <ContentContainer>
-        {/* 상단 날짜 컨트롤러 및 헤더 영역 (컴포넌트화 가능) */}
+        {/* 💡 헤더에 현재 선택된 날짜와 층수 필터 상태 전달 */}
         <BoardHeader
           date={state.currentDate}
           setDate={actions.setCurrentDate}
+          floorFilter={state.floorFilter}
+          setFloorFilter={actions.setFloorFilter}
+          SelectBasicTitle={state.SelectBasicTitle}
         />
 
         <ScrollWrapper ref={scrollRef}>
+          {/* 💡 훅에서 이미 필터링된 state를 넘기므로 안전함 */}
           <TimeGrid state={state} actions={actions} />
         </ScrollWrapper>
       </ContentContainer>
@@ -79,7 +64,7 @@ export default function ReservationBoard() {
   );
 }
 
-// 레이아웃 Styled Components
+// --- Styled Components ---
 const PageContainer = styled.div`
   width: 100%;
   min-height: 100vh;
