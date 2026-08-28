@@ -405,8 +405,8 @@ export default function FloorLayout() {
                         <InfoRow>
                           <InfoLabel>연차 기간</InfoLabel>
                           <InfoValue>
-                            {selectedBoxData.vacationStart || "-"} ~<br />
-                            {selectedBoxData.vacationEnd || "-"}
+                            {selectedBoxData.start_date || "-"} ~<br />
+                            {selectedBoxData.end_date || "-"}
                           </InfoValue>
                         </InfoRow>
                       )}
@@ -417,25 +417,25 @@ export default function FloorLayout() {
                           <InfoRow>
                             <InfoLabel>복귀 예정</InfoLabel>
                             <InfoValue>
-                              {selectedBoxData.returnDate || "-"}
+                              {selectedBoxData.end_date || "-"}
                             </InfoValue>
                           </InfoRow>
                           <InfoRow>
                             <InfoLabel>고객사</InfoLabel>
                             <InfoValue>
-                              {selectedBoxData.client || "-"}
+                              {selectedBoxData.custom || "-"}
                             </InfoValue>
                           </InfoRow>
                           <InfoRow>
                             <InfoLabel>안건</InfoLabel>
                             <InfoValue>
-                              {selectedBoxData.agenda || "-"}
+                              {selectedBoxData.description || "-"}
                             </InfoValue>
                           </InfoRow>
                           <InfoRow>
                             <InfoLabel>동행자</InfoLabel>
                             <InfoValue>
-                              {selectedBoxData.companions || "-"}
+                              {selectedBoxData.companion || "-"}
                             </InfoValue>
                           </InfoRow>
                         </>
