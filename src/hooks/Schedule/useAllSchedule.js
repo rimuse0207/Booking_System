@@ -21,72 +21,6 @@ export const FILTER_OPTIONS = {
   category: ["외근", "해외출장", "연차", "출근"],
 };
 
-// 가상 전체 데이터 (테스트용)
-const todayStr = moment().format("YYYY-MM-DD");
-const tomorrowStr = moment().add(1, "days").format("YYYY-MM-DD");
-const DUMMY_ALL_SCHEDULES = [
-  {
-    id: 1,
-    date: todayStr,
-    location: "판교",
-    department: "영업",
-    team: "영업 1그룹",
-    name: "김철수",
-    category: "외근",
-    client: "삼성전자",
-    agenda: "분기 실적 리뷰",
-    companions: "이영희",
-  },
-  {
-    id: 2,
-    date: todayStr,
-    location: "동탄",
-    department: "CE",
-    team: "기술교육팀",
-    name: "박지민",
-    category: "출근",
-    client: "-",
-    agenda: "-",
-    companions: "-",
-  },
-  {
-    id: 3,
-    date: tomorrowStr,
-    location: "아산",
-    department: "영업",
-    team: "부품소재",
-    name: "최동훈",
-    category: "해외출장",
-    client: "Apple",
-    agenda: "신제품 스펙 협의",
-    companions: "-",
-  },
-  {
-    id: 4,
-    date: todayStr,
-    location: "판교",
-    department: "CE",
-    team: "안전팀",
-    name: "정다은",
-    category: "연차",
-    client: "-",
-    agenda: "개인 사유",
-    companions: "-",
-  },
-  {
-    id: 5,
-    date: todayStr,
-    location: "판교",
-    department: "영업",
-    team: "OEM",
-    name: "유성재",
-    category: "외근",
-    client: "현대자동차",
-    agenda: "납품 일정 조율",
-    companions: "김철수",
-  },
-];
-
 export const useAllSchedule = () => {
   const [filterDate, setFilterDate] = useState(new Date());
   const [filters, setFilters] = useState({
@@ -167,7 +101,7 @@ export const useAllSchedule = () => {
         label: v,
       })),
     ],
-    [filterDate, filters],
+    [filterDate, filters, allSchedule],
   );
 
   const filteredData = useMemo(() => {
@@ -188,7 +122,7 @@ export const useAllSchedule = () => {
         return false;
       return true;
     });
-  }, [formattedFilterDate, filters]);
+  }, [formattedFilterDate, filters, allSchedule]);
 
   return {
     state: { filterDate, filters },
