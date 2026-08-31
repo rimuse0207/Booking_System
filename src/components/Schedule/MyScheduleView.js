@@ -6,15 +6,16 @@ import "react-datepicker/dist/react-datepicker.css";
 // 💡 여기도 언어팩 필수 추가!
 import { ko } from "date-fns/locale";
 import { useMySchedule } from "../../hooks/Schedule/useMySchedule";
+import { STATUS_COLORS } from "../../constants/FloorLayout/FloorLayout";
 
 registerLocale("ko", ko); // 💡 한국어 등록
 
-const CATEGORY_COLORS = {
-  외근: "#F59E0B",
-  연차: "#EF4444",
-  해외출장: "#4F46E5",
-  출근: "#10B981",
-};
+// const CATEGORY_COLORS = {
+//   외근: "#F59E0B",
+//   연차: "#EF4444",
+//   해외출장: "#4F46E5",
+//   출근: "#10B981",
+// };
 
 export function MyScheduleView() {
   const { state, actions, computed } = useMySchedule();
@@ -73,7 +74,7 @@ export function MyScheduleView() {
                         {computed.getSchedulesForDay(dayStr).map((sch, i) => (
                           <ScheduleBadge
                             key={i}
-                            $bg={CATEGORY_COLORS[sch.category]}
+                            $bg={STATUS_COLORS[sch.category]}
                           >
                             {sch.category === "연차"
                               ? "[연차]"
@@ -192,7 +193,7 @@ export function MyScheduleView() {
                       name="companions"
                       value={state.formData.companions}
                       onChange={actions.handleFormChange}
-                      placeholder="예: 김철수 선임"
+                      placeholder="예: 김철수 프로"
                     />
                   </FormGroup>
                   <FormGroup>
@@ -236,7 +237,7 @@ export function MyScheduleView() {
                     <ScheduleCard key={sch.id}>
                       <CardHeader>
                         <CardTitleGroup>
-                          <CardBadge $color={CATEGORY_COLORS[sch.category]}>
+                          <CardBadge $color={STATUS_COLORS[sch.category]}>
                             {sch.category}
                           </CardBadge>
                           <CardDate>{sch.startDate}</CardDate>
@@ -523,6 +524,10 @@ const FormRow = styled.div`
   > * {
     flex: 1;
   }
+  @media (max-width: 768px) {
+    display: block;
+    margin-bottom: 10px;
+  }
 `;
 const FormGroup = styled.div`
   display: flex;
@@ -533,6 +538,9 @@ const Label = styled.label`
   font-size: 0.85rem;
   font-weight: 700;
   color: #475569;
+  @media (max-width: 768px) {
+    margin-top: 10px;
+  }
 `;
 const Input = styled.input`
   padding: 10px 14px;

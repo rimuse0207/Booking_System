@@ -18,7 +18,7 @@ export function TimeGrid({ state, actions }) {
     draft,
     dragState,
     isModalOpen,
-    rooms, // 💡 훅에서 이미 필터링된 방 목록
+    rooms,
     LoginInfo,
     currentDate,
   } = state;
@@ -37,7 +37,7 @@ export function TimeGrid({ state, actions }) {
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(moment());
-    }, 60000); // 60초마다 갱신
+    }, 60000);
     return () => clearInterval(interval);
   }, []);
 
@@ -61,9 +61,7 @@ export function TimeGrid({ state, actions }) {
   };
 
   const isTodayView = moment(currentDate).isSame(currentTime, "day");
-
   const currentMins = currentTime.hours() * 60 + currentTime.minutes();
-
   const currentLineLeft = currentMins * MINUTE_WIDTH;
 
   return (
@@ -232,16 +230,20 @@ export function TimeGrid({ state, actions }) {
                     </FloatingBar>
                   )}
 
+                  {/* 💡 모바일 터치 이벤트(onTouchStart) 추가 */}
                   <DragHandleLeft
                     $isEditMode={!!draft.editId}
                     onMouseDown={(e) => handleDragStart(e, "left", roomIdx)}
+                    onTouchStart={(e) => handleDragStart(e, "left", roomIdx)}
                   >
                     <HandleBar $isEditMode={!!draft.editId} />
                   </DragHandleLeft>
 
+                  {/* 💡 모바일 터치 이벤트(onTouchStart) 추가 */}
                   <DragHandleRight
                     $isEditMode={!!draft.editId}
                     onMouseDown={(e) => handleDragStart(e, "right", roomIdx)}
+                    onTouchStart={(e) => handleDragStart(e, "right", roomIdx)}
                   >
                     <HandleBar $isEditMode={!!draft.editId} />
                   </DragHandleRight>
@@ -269,22 +271,18 @@ const BoardWrapper = styled.div`
   user-select: ${(props) => (props.$isDragging ? "none" : "auto")};
 `;
 
-// 💡 현재 시간을 나타내는 수직선 스타일
 const CurrentTimeLine = styled.div`
   position: absolute;
-  top: 60px; /* 헤더 아래부터 시작 */
+  top: 60px;
   bottom: 0;
   left: calc(var(--label-width) + ${(props) => props.$left}px);
   width: 2px;
-  background-color: rgba(16, 185, 129, 0.5); /* 쨍한 초록색 */
-  z-index: 25; /* 예약 박스(10)보다 위에 오도록 설정 */
-  pointer-events: none; /* 클릭 이벤트를 방해하지 않도록 관통시킴 */
-
-  /* 부드러운 이동 효과 */
+  background-color: rgba(16, 185, 129, 0.5);
+  z-index: 10;
+  pointer-events: none;
   transition: left 0.3s ease-in-out;
 `;
 
-// 💡 선 위에 달리는 시간 표시 뱃지
 const CurrentTimeBadge = styled.div`
   position: absolute;
   top: 0px;
@@ -442,7 +440,7 @@ const RoomLabel = styled.div`
   @media (max-width: 768px) {
     padding-left: 0;
     justify-content: center;
-    font-size: 0.85rem;
+    font-size: 0.65rem;
   }
 `;
 
@@ -675,6 +673,8 @@ const DragHandle = styled.div`
   align-items: center;
   justify-content: center;
   pointer-events: auto;
+  touch-action: none; /* 💡 모바일 브라우저의 기본 동작(스크롤, 줌) 방지 및 드래그 허용 */
+
   &:hover ${HandleBar} {
     transform: scaleY(1.2);
     background-color: ${(props) => (props.$isEditMode ? "#D97706" : "#3730a3")};

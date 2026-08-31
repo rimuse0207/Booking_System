@@ -24,11 +24,8 @@ export const useReservation = () => {
   const { showToast } = useToast();
   const { actions } = useLoginChecking();
 
-  // --- 1. 상태(State) 선언 ---
   const [SelectBasicTitle, setSelectBasicTitle] = useState("Company_Room");
   const [currentDate, setCurrentDate] = useState(new Date());
-
-  // 💡 층수 필터 상태 추가 (기본값: ALL)
   const [floorFilter, setFloorFilter] = useState("ALL");
 
   const [rooms, setRooms] = useState([]);
@@ -39,10 +36,9 @@ export const useReservation = () => {
   const [dragState, setDragState] = useState(null);
   const isDraggingRef = useRef(false);
 
-  // 모달 제어 상태
-  const [isModalOpen, setIsModalOpen] = useState(false); // 신규 폼 모달
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false); // 상세 보기 모달
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false); // 수정 폼 모달
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
   const [selectedReservation, setSelectedReservation] = useState(null);
   const [modalForm, setModalForm] = useState({
@@ -51,29 +47,17 @@ export const useReservation = () => {
     sendEmail: false,
   });
 
-  // --- 💡 1-1. 층수 및 예외(차량) 필터링 로직 (useMemo 적용 최적화) ---
   const filteredRooms = useMemo(() => {
     return rooms.filter((room) => {
-      // 1) 전체 보기면 무조건 통과
       if (floorFilter === "ALL") return true;
-
-      // 이름 속성 매핑 (DB 스키마 구조에 맞게 안전하게 속성 참조)
       const roomName = room.brity_works_room_info_name;
-
-      // 2) 법인차량 예외 처리 (이름에 '차량'이 포함되어 있다면 무조건 통과)
       if (roomName.includes("차량")) return true;
-
-      // 3) 2F / 6F 필터 선택 시 해당 문자로 시작하는 방만 통과
       if (floorFilter === "2F" && roomName.startsWith("2F")) return true;
       if (floorFilter === "6F" && roomName.startsWith("6F")) return true;
-
       return false;
     });
   }, [rooms, floorFilter]);
 
-  // --- 2. 모달 열기/닫기 및 흐름 제어 액션 ---
-
-  // (신규) 툴팁 체크 버튼 누를 때 -> 신규 예약 폼 모달 열기
   const openReservationModal = useCallback(() => {
     setModalForm({
       subject: `${LoginInfo.company} ${LoginInfo.name}님의 회의실 예약`,
@@ -93,13 +77,11 @@ export const useReservation = () => {
     setSelectedReservation(null);
   }, []);
 
-  // 기존 예약 클릭 시 상세 보기 모달 열기
   const handleReservationClick = useCallback((reservation) => {
     setSelectedReservation(reservation);
     setIsDetailModalOpen(true);
   }, []);
 
-  // (수정 1) 상세 창에서 '수정' 버튼 클릭 시 -> 드래그 가능한 가예약(Draft) 블록 생성
   const editReservation = useCallback(
     (reservation) => {
       closeDetailModal();
@@ -107,7 +89,6 @@ export const useReservation = () => {
       const rStart = getMinsFromDateStr(reservation.startTime);
       const rEnd = getMinsFromDateStr(reservation.endTime);
 
-      // 💡 rooms 대신 filteredRooms 배열에서 인덱스 탐색
       const targetRoomIndex = filteredRooms.findIndex(
         (r) => r.brity_works_room_info_targetId === reservation.roomId,
       );
@@ -141,9 +122,6 @@ export const useReservation = () => {
     setDraft(null);
   }, [draft]);
 
-  // --- 3. 데이터 패칭 및 API 호출 액션 ---
-
-  // 데이터 조회
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -176,12 +154,10 @@ export const useReservation = () => {
     fetchData();
   }, [currentDate, SelectBasicTitle]);
 
-  // 신규 예약 API 호출
   const submitReservation = useCallback(async () => {
     const finalStartMin = modalForm.isAllDay ? 0 : draft.startMin;
     const finalEndMin = modalForm.isAllDay ? 24 * 60 : draft.endMin;
 
-    // 💡 rooms 대신 filteredRooms 에서 인덱스로 타겟 ID 조회
     const targetRoomId =
       filteredRooms[draft.roomIndex]?.brity_works_room_info_targetId;
 
@@ -221,7 +197,6 @@ export const useReservation = () => {
     }
   }, [draft, modalForm, currentDate, filteredRooms, LoginInfo]);
 
-  // 기존 예약 수정 API 호출
   const submitEditReservation = useCallback(
     async (updatedData) => {
       try {
@@ -249,7 +224,6 @@ export const useReservation = () => {
     [closeEditModal],
   );
 
-  // 예약 삭제 API 호출
   const deleteReservation = useCallback(
     async (reservationId) => {
       if (!window.confirm("정말로 이 예약을 삭제하시겠습니까?")) return;
@@ -272,15 +246,23 @@ export const useReservation = () => {
     [closeDetailModal],
   );
 
-  // --- 4. 드래그 UI 및 충돌 방지 제어 로직 ---
-
-  // 마우스 드래그 이벤트 (스냅 효과)
+  // --- 💡 모바일 터치 및 마우스 하이브리드 드래그 처리 ---
   useEffect(() => {
     if (!dragState) return;
 
-    const handleMouseMove = (e) => {
+    // e.clientX를 마우스/터치 구분해서 가져오는 헬퍼 함수
+    const getClientX = (e) => {
+      return e.touches && e.touches.length > 0
+        ? e.touches[0].clientX
+        : e.clientX;
+    };
+
+    const handleMove = (e) => {
       isDraggingRef.current = true;
-      const diffX = e.clientX - dragState.startX;
+      const clientX = getClientX(e);
+      if (!clientX) return;
+
+      const diffX = clientX - dragState.startX;
       const diffMins = Math.round(diffX / (30 * MINUTE_WIDTH)) * 30;
 
       setDraft((prev) => {
@@ -303,18 +285,27 @@ export const useReservation = () => {
       });
     };
 
-    const handleMouseUp = () => {
+    const handleUp = () => {
       setDragState(null);
       setTimeout(() => {
         isDraggingRef.current = false;
       }, 100);
     };
 
-    document.addEventListener("mousemove", handleMouseMove);
-    document.addEventListener("mouseup", handleMouseUp);
+    // 마우스 이벤트
+    document.addEventListener("mousemove", handleMove);
+    document.addEventListener("mouseup", handleUp);
+    // 모바일 터치 이벤트
+    document.addEventListener("touchmove", handleMove, { passive: false });
+    document.addEventListener("touchend", handleUp);
+    document.addEventListener("touchcancel", handleUp);
+
     return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
+      document.removeEventListener("mousemove", handleMove);
+      document.removeEventListener("mouseup", handleUp);
+      document.removeEventListener("touchmove", handleMove);
+      document.removeEventListener("touchend", handleUp);
+      document.removeEventListener("touchcancel", handleUp);
     };
   }, [dragState]);
 
@@ -325,18 +316,21 @@ export const useReservation = () => {
       if (!LoginChecking) {
         return showToast("로그인 이후 예약이 가능합니다.", "error");
       }
-      if (dragState || isDraggingRef.current || isModalOpen) return;
+
+      // 💡 [버그 픽스] 이미 드래프트(가예약 박스)가 선택된 상태에서 다른 곳을 클릭하면 무시하거나 취소 처리
+      if (draft || dragState || isDraggingRef.current || isModalOpen) {
+        // 이미 박스가 띄워져 있다면 새 박스를 그리지 않는다. (기존 드래프트 유실/NaN 에러 방지)
+        return;
+      }
 
       const startMin = hour * 60 + (isSecondHalf ? 30 : 0);
       const endMin = startMin + 30;
 
-      // 💡 rooms 대신 filteredRooms 에서 타겟 ID 조회
       const targetRoomId =
         filteredRooms[roomIndex]?.brity_works_room_info_targetId;
 
       const isOccupied = reservations.some((r) => {
         if (r.roomId !== targetRoomId) return false;
-
         const rStart = getMinsFromDateStr(r.startTime);
         const rEnd = getMinsFromDateStr(r.endTime);
         return startMin < rEnd && endMin > rStart;
@@ -344,20 +338,20 @@ export const useReservation = () => {
 
       if (!isOccupied) setDraft({ roomIndex, startMin, endMin });
     },
-    [dragState, isModalOpen, reservations, filteredRooms],
+    [draft, dragState, isModalOpen, reservations, filteredRooms],
   );
 
-  // 드래그 시작 시 한계선 계산
+  // 드래그 시작 시 한계선 계산 (모바일 터치 호환)
   const handleDragStart = useCallback(
     (e, type, roomIndex) => {
       e.stopPropagation();
-      e.preventDefault();
+      // 터치 스크롤 방지는 컴포넌트의 CSS(touch-action: none)와 함께 처리
 
-      // 💡 rooms 대신 filteredRooms 에서 타겟 ID 조회
+      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+
       const targetRoomId =
         filteredRooms[roomIndex]?.brity_works_room_info_targetId;
 
-      // 현재 수정 중인 자기 자신(editId)은 충돌 블록에서 제외!
       const roomRes = reservations.filter(
         (r) => r.roomId === targetRoomId && r.uid !== draft?.editId,
       );
@@ -378,7 +372,7 @@ export const useReservation = () => {
       setDragState({
         active: true,
         type,
-        startX: e.clientX,
+        startX: clientX,
         initialStart: draft.startMin,
         initialEnd: draft.endMin,
         minBound,
@@ -392,10 +386,8 @@ export const useReservation = () => {
     state: {
       SelectBasicTitle,
       currentDate,
-
-      floorFilter, // 💡 컴포넌트(Header)에서 사용할 필터 상태
-
-      rooms: filteredRooms, // 💡 컴포넌트는 원본 rooms가 아닌 필터링된 rooms를 렌더링하도록 덮어씌움
+      floorFilter,
+      rooms: filteredRooms,
       reservations,
       draft,
       dragState,
@@ -411,24 +403,18 @@ export const useReservation = () => {
     actions: {
       setSelectBasicTitle,
       setCurrentDate,
-
-      setFloorFilter, // 💡 컴포넌트(Header)에서 필터값을 바꿀 함수
-
+      setFloorFilter,
       setDraft,
       setIsModalOpen,
       setModalForm,
       handleSlotClick,
       handleDragStart,
-
-      // 모달/UI 전환 관련
       openReservationModal,
       handleReservationClick,
       closeDetailModal,
       editReservation,
       closeEditModal,
       confirmDragEdit,
-
-      // 실제 서버 데이터 변경 처리
       submitReservation,
       submitEditReservation,
       deleteReservation,
