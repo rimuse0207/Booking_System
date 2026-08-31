@@ -14,7 +14,7 @@ export default function Schedule() {
       <ContentContainer>
         <Header>
           <HeaderLeft>
-            <Badge>근태 및 일정 관리</Badge>
+            <Badge>일정 관리</Badge>
             <Title>{viewMode === "all" ? "전체 일정 현황" : "나의 일정"}</Title>
           </HeaderLeft>
 

@@ -8,7 +8,6 @@ export const useLoginChecking = () => {
     try {
       const res = await Request_Get_Axios("/Login/LoginChecking");
       if (res.status) {
-        console.log(res.data.LoginChecking);
         if (!res.data.LoginChecking) {
           dispatch(Logout_Inistate_State_Func());
         }

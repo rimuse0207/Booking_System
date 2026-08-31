@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import {
   HOURS,
@@ -32,6 +32,15 @@ export function TimeGrid({ state, actions }) {
     setFloorFilter,
   } = actions;
 
+  const [currentTime, setCurrentTime] = useState(moment());
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(moment());
+    }, 60000); // 60초마다 갱신
+    return () => clearInterval(interval);
+  }, []);
+
   const getBoxStyleByMins = (startMin, endMin) => ({
     left: `${startMin * MINUTE_WIDTH}px`,
     width: `${(endMin - startMin) * MINUTE_WIDTH - 5}px`,
@@ -50,6 +59,12 @@ export function TimeGrid({ state, actions }) {
       openReservationModal(e);
     }
   };
+
+  const isTodayView = moment(currentDate).isSame(currentTime, "day");
+
+  const currentMins = currentTime.hours() * 60 + currentTime.minutes();
+
+  const currentLineLeft = currentMins * MINUTE_WIDTH;
 
   return (
     <BoardWrapper $isDragging={!!dragState}>
@@ -80,6 +95,12 @@ export function TimeGrid({ state, actions }) {
           ))}
         </TimeRow>
       </GridHeader>
+
+      {isTodayView && (
+        <CurrentTimeLine $left={currentLineLeft}>
+          <CurrentTimeBadge>{currentTime.format("HH:mm")}</CurrentTimeBadge>
+        </CurrentTimeLine>
+      )}
 
       <GridBody>
         {rooms.map((room, roomIdx) => (
@@ -139,7 +160,6 @@ export function TimeGrid({ state, actions }) {
                         ? `${resStart.format("MM.DD HH:mm")} - ${resEnd.format("MM.DD HH:mm")}`
                         : `${resStart.format("HH:mm")} - ${resEnd.format("HH:mm")}`;
 
-                  // 💡 6시간(360분) 이상이면 중앙 정렬
                   const isLongReservation =
                     res.allDayYn === "Y" || endMin - startMin >= 360;
 
@@ -247,6 +267,38 @@ const BoardWrapper = styled.div`
   flex-direction: column;
   position: relative;
   user-select: ${(props) => (props.$isDragging ? "none" : "auto")};
+`;
+
+// 💡 현재 시간을 나타내는 수직선 스타일
+const CurrentTimeLine = styled.div`
+  position: absolute;
+  top: 60px; /* 헤더 아래부터 시작 */
+  bottom: 0;
+  left: calc(var(--label-width) + ${(props) => props.$left}px);
+  width: 2px;
+  background-color: rgba(16, 185, 129, 0.5); /* 쨍한 초록색 */
+  z-index: 25; /* 예약 박스(10)보다 위에 오도록 설정 */
+  pointer-events: none; /* 클릭 이벤트를 방해하지 않도록 관통시킴 */
+
+  /* 부드러운 이동 효과 */
+  transition: left 0.3s ease-in-out;
+`;
+
+// 💡 선 위에 달리는 시간 표시 뱃지
+const CurrentTimeBadge = styled.div`
+  position: absolute;
+  top: 0px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #10b981;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 0 0 8px 8px;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.4);
+  opacity: 1;
 `;
 
 const GridHeader = styled.div`
@@ -427,7 +479,6 @@ const HalfSlot = styled.div`
   }
 `;
 
-// 💡 Flex 속성 동적 변경 (가운데 정렬)
 const ReservationBox = styled.div`
   position: absolute;
   top: 8px;
@@ -448,7 +499,6 @@ const ReservationBox = styled.div`
   justify-content: ${(props) =>
     props.$TextCenter ? "center" : "space-between"};
   align-items: ${(props) => (props.$TextCenter ? "center" : "flex-start")};
-  /* gap: ${(props) => (props.$TextCenter ? "4px" : "0")}; */
 
   &:hover {
     transform: translateY(-2px);
@@ -461,7 +511,6 @@ const ReservationBox = styled.div`
   }
 `;
 
-// 💡 넓이 100% 및 텍스트 정렬 변경
 const BoxTitle = styled.div`
   font-size: 0.75rem;
   font-weight: 700;
@@ -473,7 +522,6 @@ const BoxTitle = styled.div`
   text-align: ${(props) => (props.$TextCenter ? "center" : "left")};
 `;
 
-// 💡 텍스트가 중앙에 올 때는 space-between 해제
 const BoxFooter = styled.div`
   display: flex;
   justify-content: ${(props) =>

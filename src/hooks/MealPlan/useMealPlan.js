@@ -7,7 +7,6 @@ export const useMealPlan = () => {
   const [meals, setMeals] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // 월요일 ~ 금요일 날짜 계산
   const startOfWeek = moment(baseDate).startOf("isoWeek");
   const endOfWeek = moment(baseDate).startOf("isoWeek").add(4, "days");
 

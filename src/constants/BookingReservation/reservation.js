@@ -19,7 +19,6 @@ export const timeToMins = (timeStr) => {
 
 // 💡 조회 중인 날짜(currentDate)를 기준으로 시작 시간(분) 계산
 export const timeToMinsStartData = (startTimeStr, currentDate) => {
-  console.log(currentDate);
   const viewStartOfDay = moment(currentDate).startOf("day");
   const resStart = moment(startTimeStr);
 

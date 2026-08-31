@@ -7,61 +7,6 @@ export const OFFICE_STRUCTURE = {
   "아산 사업장": [3],
 };
 
-const INITIAL_BOXES = [
-  {
-    id: 1,
-    office: "판교 사업장",
-    floor: 6,
-    type: "user",
-    x: 40,
-    y: 100,
-    width: 70,
-    height: 45,
-    name: "유성재",
-    email: "sjyoo@dhk.co.kr",
-    department: "개발 1팀",
-    status: "출근",
-  },
-
-  // 💡 테스트용 공간 데이터 3종 (ROOM, EQUIPMENT, DISABLE)
-  {
-    id: 2,
-    office: "판교 사업장",
-    floor: 6,
-    type: "room",
-    x: 40,
-    y: 170,
-    width: 230,
-    height: 100,
-    label: "대회의실 A",
-    identifier: "ROOM_A",
-  },
-  {
-    id: 3,
-    office: "판교 사업장",
-    floor: 6,
-    type: "room",
-    x: 290,
-    y: 170,
-    width: 120,
-    height: 100,
-    label: "공용 3D 프린터",
-    identifier: "EQUIPMENT_PRINTER",
-  },
-  {
-    id: 4,
-    office: "판교 사업장",
-    floor: 6,
-    type: "room",
-    x: 430,
-    y: 170,
-    width: 100,
-    height: 100,
-    label: "비품 창고",
-    identifier: "DISABLE_STORAGE",
-  },
-];
-
 export const useFloorLayout = () => {
   const [boxes, setBoxes] = useState([]);
   const [backupBoxes, setBackupBoxes] = useState([]);

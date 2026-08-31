@@ -45,7 +45,6 @@ export const useLogin = () => {
         },
       });
 
-      console.log(res);
       if (!res.data.dataSuccess) {
         setForm({ ...form, password: "" });
         // alert("PW를 다시 확인 해주세요.");

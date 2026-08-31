@@ -160,7 +160,7 @@ export const useReservation = () => {
             date: dateStr,
           }),
         ]);
-        console.log(reservationsRes);
+
         if (roomsRes?.data) setRooms(roomsRes.data);
         if (reservationsRes?.data) setReservations(reservationsRes.data);
       } catch (error) {
@@ -178,7 +178,6 @@ export const useReservation = () => {
 
   // 신규 예약 API 호출
   const submitReservation = useCallback(async () => {
-    console.log("modalForm", modalForm);
     const finalStartMin = modalForm.isAllDay ? 0 : draft.startMin;
     const finalEndMin = modalForm.isAllDay ? 24 * 60 : draft.endMin;
 
@@ -230,11 +229,6 @@ export const useReservation = () => {
           "/RoomApp/updateReservations",
           updatedData,
         );
-        console.log(req);
-        // setReservations((prev) =>
-        //   prev.map((r) => (r.uid === updatedData.uid ? updatedData : r)),
-        // );
-        // closeEditModal();
 
         if (req.status) {
           if (req.data.status === 200 && req.data.statusText === "OK") {

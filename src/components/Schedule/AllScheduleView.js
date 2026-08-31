@@ -2,8 +2,9 @@ import React from "react";
 import styled from "styled-components";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-// 💡 한국어 달력 언어팩 임포트 (버전에 따라 경로가 다를 수 있어 가장 안정적인 방식 사용)
+// 💡 한국어 달력 언어팩 임포트
 import { ko } from "date-fns/locale";
+import "moment/locale/ko";
 import {
   useAllSchedule,
   FILTER_OPTIONS,
@@ -21,20 +22,42 @@ const CATEGORY_COLORS = {
 export function AllScheduleView() {
   const { state, actions, computed } = useAllSchedule();
 
+  const handlePrevDay = () => {
+    const current = state.filterDate || new Date();
+    const prevDate = new Date(current);
+    prevDate.setDate(prevDate.getDate() - 1);
+    actions.setFilterDate(prevDate);
+  };
+
+  const handleNextDay = () => {
+    const current = state.filterDate || new Date();
+    const nextDate = new Date(current);
+    nextDate.setDate(nextDate.getDate() + 1);
+    actions.setFilterDate(nextDate);
+  };
+
   return (
     <AllScheduleContainer>
       <FilterBox>
         <FilterRow>
           <FilterLabel>일시</FilterLabel>
-          <FilterDatePickerWrapper>
-            <DatePicker
-              selected={state.filterDate}
-              onChange={actions.setFilterDate}
-              dateFormat="yyyy년 MM월 dd일"
-              locale="ko" // 💡 언어 설정 적용
-              placeholderText="전체 일자"
-            />
-          </FilterDatePickerWrapper>
+          <DateControlWrapper>
+            <DateNavBtn onClick={handlePrevDay} title="이전 날짜">
+              &lt;
+            </DateNavBtn>
+            <FilterDatePickerWrapper>
+              <DatePicker
+                selected={state.filterDate}
+                onChange={actions.setFilterDate}
+                dateFormat="yyyy년 MM월 dd일 (eee)"
+                locale="ko"
+                placeholderText="전체 일자"
+              />
+            </FilterDatePickerWrapper>
+            <DateNavBtn onClick={handleNextDay} title="다음 날짜">
+              &gt;
+            </DateNavBtn>
+          </DateControlWrapper>
         </FilterRow>
 
         {Object.entries({
@@ -87,11 +110,11 @@ export function AllScheduleView() {
         <Table>
           <thead>
             <tr>
-              <Th>장소</Th>
-              <Th>부서</Th>
-              <Th>팀명</Th>
-              <Th>이름</Th>
-              <Th>구분</Th>
+              <Th style={{ width: "25px" }}>장소</Th>
+              <Th style={{ width: "25px" }}>부서</Th>
+              <Th style={{ width: "65px" }}>팀명</Th>
+              <Th style={{ width: "40px" }}>이름</Th>
+              <Th style={{ width: "40px" }}>구분</Th>
               <Th>고객사</Th>
               <Th>안건</Th>
               <Th>동행자</Th>
@@ -170,6 +193,36 @@ const FilterLabel = styled.div`
   color: #475569;
   margin-top: 6px;
 `;
+
+// 💡 날짜 선택기와 화살표 버튼을 묶어주는 컨테이너
+const DateControlWrapper = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+// 💡 날짜 양옆 이동 화살표 버튼 스타일
+const DateNavBtn = styled.button`
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: #475569;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: #f8fafc;
+    border-color: #0ea5e9;
+    color: #0ea5e9;
+  }
+`;
+
 const FilterBtnGroup = styled.div`
   display: flex;
   flex-wrap: wrap;
@@ -191,7 +244,7 @@ const FilterTag = styled.button`
   }
 `;
 
-/* 💡 팝업 캘린더가 깨지지 않고 깔끔하게 보이도록 전용 스타일 이식 */
+/* 팝업 캘린더 전용 스타일 */
 const FilterDatePickerWrapper = styled.div`
   .react-datepicker-wrapper {
     width: 200px;
@@ -201,7 +254,9 @@ const FilterDatePickerWrapper = styled.div`
   }
   .react-datepicker__input-container input {
     width: 100%;
-    padding: 8px 12px;
+    /* 높이를 화살표 버튼(38px)과 동일하게 맞춤 */
+    height: 38px;
+    padding: 0 12px;
     font-size: 0.95rem;
     border: 1px solid #cbd5e1;
     border-radius: 8px;
@@ -209,13 +264,14 @@ const FilterDatePickerWrapper = styled.div`
     color: #1e293b;
     cursor: pointer;
     font-family: inherit;
+    box-sizing: border-box;
+    text-align: center;
     &:focus {
       border-color: #0ea5e9;
       box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
     }
   }
 
-  /* 팝업 달력 디자인 */
   .react-datepicker-popper {
     z-index: 100;
   }

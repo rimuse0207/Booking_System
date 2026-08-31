@@ -37,7 +37,7 @@ export default function MealPlan() {
         {/* 상단 헤더 영역 */}
         <Header>
           <HeaderLeft>
-            <Badge>구내식당</Badge>
+            <Badge>디에이치케이솔루션 빌딩 B1F 식당</Badge>
             <Title>{weekLabel}</Title>
           </HeaderLeft>
 

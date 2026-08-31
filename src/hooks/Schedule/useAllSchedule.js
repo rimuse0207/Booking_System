@@ -39,7 +39,7 @@ export const useAllSchedule = () => {
     const req = await Request_Get_Axios("/ScheduleApp/All_Pims_Data", {
       Selected_Date: filterDate,
     });
-    console.log(req);
+
     if (req.status) {
       setAllSchedule(req.data);
     }
