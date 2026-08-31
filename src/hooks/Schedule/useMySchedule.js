@@ -1,27 +1,21 @@
 import { useState, useMemo } from "react";
 import moment from "moment";
+import { useSelector } from "react-redux";
 
 export const useMySchedule = () => {
+  const LoginInfo = useSelector(
+    (state) => state.Login_Info_Reducer_State.Login_Info,
+  );
   const [currentMonth, setCurrentMonth] = useState(moment());
   const [selectedDate, setSelectedDate] = useState(moment());
   const [activeTab, setActiveTab] = useState("register");
   const [selectedDates, setSelectedDates] = useState([]);
 
-  const [schedules, setSchedules] = useState([
-    {
-      id: 1,
-      category: "외근",
-      startDate: moment().format("YYYY-MM-DD"),
-      endDate: moment().format("YYYY-MM-DD"),
-      client: "삼성전자 서초사옥",
-      agenda: "신규 프로젝트 킥오프 미팅",
-      companions: "이영희 책임",
-    },
-  ]);
+  const [schedules, setSchedules] = useState([]);
 
   const [formData, setFormData] = useState({
     id: null,
-    name: "유성재",
+    name: LoginInfo.name,
     category: "외근",
     client: "",
     agenda: "",

@@ -47,18 +47,6 @@ export const useMealPlan = () => {
     const fetchMeals = async () => {
       setIsLoading(true);
       try {
-        /* 
-        // 💡 [실제 연동 시 아래 주석 해제 및 API 주소 변경]
-        const response = await Request_Get_Axios("/FoodApp/meals", {
-          startDate: startOfWeek.format("YYYY-MM-DD"),
-          endDate: endOfWeek.format("YYYY-MM-DD"),
-        });
-        
-        if (response.data) {
-          setMeals(response.data);
-        }
-        */
-
         const response = await Request_Get_Axios(
           "/FoodApp/RenewalWeekFoodMenu",
           {

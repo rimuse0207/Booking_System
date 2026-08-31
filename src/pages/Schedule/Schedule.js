@@ -5,7 +5,7 @@ import { AllScheduleView } from "../../components/Schedule/AllScheduleView";
 import { MyScheduleView } from "../../components/Schedule/MyScheduleView";
 
 export default function Schedule() {
-  const [viewMode, setViewMode] = useState("my");
+  const [viewMode, setViewMode] = useState("all");
 
   return (
     <PageContainer>
@@ -55,7 +55,6 @@ const ContentContainer = styled.div`
   flex: 1;
   display: flex;
   flex-direction: column;
-  max-width: 1600px;
   margin: 0 auto;
   width: 100%;
   box-sizing: border-box;

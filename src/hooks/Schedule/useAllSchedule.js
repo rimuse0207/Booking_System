@@ -1,5 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import moment from "moment";
+import { Request_Get_Axios } from "../../API";
 
 export const FILTER_OPTIONS = {
   location: ["판교", "동탄", "아산"],
@@ -94,6 +95,21 @@ export const useAllSchedule = () => {
     team: [],
     category: ["외근", "해외출장", "연차"],
   });
+  const [allSchedule, setAllSchedule] = useState([]);
+
+  useEffect(() => {
+    getAllSchedules();
+  }, [filterDate]);
+
+  const getAllSchedules = async () => {
+    const req = await Request_Get_Axios("/ScheduleApp/All_Pims_Data", {
+      Selected_Date: filterDate,
+    });
+    console.log(req);
+    if (req.status) {
+      setAllSchedule(req.data);
+    }
+  };
 
   const toggleFilter = (type, value) => {
     setFilters((prev) => {
@@ -134,17 +150,8 @@ export const useAllSchedule = () => {
 
   const activeFilterChips = useMemo(
     () => [
-      ...(filterDate
-        ? [
-            {
-              type: "date",
-              value: filterDate,
-              label: `일시: ${moment(filterDate).format("YYYY. MM. DD")}`,
-            },
-          ]
-        : []),
       ...filters.location.map((v) => ({
-        type: "location",
+        type: "places",
         value: v,
         label: v,
       })),
@@ -164,12 +171,8 @@ export const useAllSchedule = () => {
   );
 
   const filteredData = useMemo(() => {
-    return DUMMY_ALL_SCHEDULES.filter((row) => {
-      if (formattedFilterDate && row.date !== formattedFilterDate) return false;
-      if (
-        filters.location.length > 0 &&
-        !filters.location.includes(row.location)
-      )
+    return allSchedule.filter((row) => {
+      if (filters.location.length > 0 && !filters.location.includes(row.places))
         return false;
       if (
         filters.department.length > 0 &&
@@ -180,7 +183,7 @@ export const useAllSchedule = () => {
         return false;
       if (
         filters.category.length > 0 &&
-        !filters.category.includes(row.category)
+        !filters.category.includes(row.division)
       )
         return false;
       return true;

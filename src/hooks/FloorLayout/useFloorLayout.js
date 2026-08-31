@@ -63,7 +63,7 @@ const INITIAL_BOXES = [
 ];
 
 export const useFloorLayout = () => {
-  const [boxes, setBoxes] = useState(INITIAL_BOXES);
+  const [boxes, setBoxes] = useState([]);
   const [backupBoxes, setBackupBoxes] = useState([]);
 
   const [isEditMode, setIsEditMode] = useState(false);

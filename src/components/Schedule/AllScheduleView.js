@@ -32,7 +32,6 @@ export function AllScheduleView() {
               onChange={actions.setFilterDate}
               dateFormat="yyyy년 MM월 dd일"
               locale="ko" // 💡 언어 설정 적용
-              isClearable
               placeholderText="전체 일자"
             />
           </FilterDatePickerWrapper>
@@ -88,7 +87,6 @@ export function AllScheduleView() {
         <Table>
           <thead>
             <tr>
-              <Th>일시</Th>
               <Th>장소</Th>
               <Th>부서</Th>
               <Th>팀명</Th>
@@ -116,21 +114,20 @@ export function AllScheduleView() {
             ) : (
               computed.filteredData.map((row) => (
                 <tr key={row.id}>
-                  <Td>{row.date}</Td>
-                  <Td>{row.location}</Td>
+                  <Td>{row.places}</Td>
                   <Td>{row.department}</Td>
                   <Td>{row.team}</Td>
                   <Td style={{ fontWeight: "700" }}>{row.name}</Td>
                   <Td>
                     <TableBadge
-                      $color={CATEGORY_COLORS[row.category] || "#64748B"}
+                      $color={CATEGORY_COLORS[row.division] || "#64748B"}
                     >
-                      {row.category}
+                      {row.division}
                     </TableBadge>
                   </Td>
-                  <Td>{row.client}</Td>
-                  <Td>{row.agenda}</Td>
-                  <Td>{row.companions}</Td>
+                  <Td>{row.custom}</Td>
+                  <Td>{row.description}</Td>
+                  <Td>{row.companion}</Td>
                 </tr>
               ))
             )}
