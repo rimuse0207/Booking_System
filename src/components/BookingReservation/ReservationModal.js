@@ -39,7 +39,7 @@ export function ReservationModal({ state, actions }) {
   }, []);
 
   return (
-    <ModalOverlay onClick={() => setIsModalOpen(false)}>
+    <ModalOverlay>
       <ModalContainer onClick={(e) => e.stopPropagation()}>
         <ModalHeader>
           <ModalTitle>회의실 예약 세부 설정</ModalTitle>

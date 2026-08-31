@@ -226,13 +226,27 @@ export const useReservation = () => {
   const submitEditReservation = useCallback(
     async (updatedData) => {
       try {
-        await Request_Post_Axios("/RoomApp/updateReservations", updatedData);
-
-        setReservations((prev) =>
-          prev.map((r) => (r.uid === updatedData.uid ? updatedData : r)),
+        const req = await Request_Post_Axios(
+          "/RoomApp/updateReservations",
+          updatedData,
         );
-        closeEditModal();
-        showToast("회의실 예약이 수정되었습니다.", "success");
+        console.log(req);
+        // setReservations((prev) =>
+        //   prev.map((r) => (r.uid === updatedData.uid ? updatedData : r)),
+        // );
+        // closeEditModal();
+
+        if (req.status) {
+          if (req.data.status === 200 && req.data.statusText === "OK") {
+            setReservations((prev) =>
+              prev.map((r) => (r.uid === updatedData.uid ? updatedData : r)),
+            );
+            closeEditModal();
+            showToast("회의실 예약이 수정되었습니다.", "success");
+          } else {
+            showToast(req.data.message, "error");
+          }
+        }
       } catch (error) {
         console.error("예약 수정 실패:", error);
         showToast("예약 수정 중 오류가 발생했습니다.", "error");

@@ -49,7 +49,7 @@ export function ReservationEditModal({ state, actions }) {
   };
 
   return (
-    <Overlay onClick={closeEditModal}>
+    <Overlay>
       <ModalBox onClick={(e) => e.stopPropagation()}>
         <Header>
           <Title>예약 수정</Title>

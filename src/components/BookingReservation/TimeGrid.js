@@ -448,7 +448,7 @@ const ReservationBox = styled.div`
   justify-content: ${(props) =>
     props.$TextCenter ? "center" : "space-between"};
   align-items: ${(props) => (props.$TextCenter ? "center" : "flex-start")};
-  gap: ${(props) => (props.$TextCenter ? "4px" : "0")};
+  /* gap: ${(props) => (props.$TextCenter ? "4px" : "0")}; */
 
   &:hover {
     transform: translateY(-2px);
