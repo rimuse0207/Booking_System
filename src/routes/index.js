@@ -14,6 +14,8 @@ import ReservationBoard from "../pages/BookingReservation/ReservationBoard";
 import MealPlan from "../pages/MealPlan/MealPlan";
 import FloorLayout from "../pages/FloorLayout/FloorLayout";
 import Schedule from "../pages/Schedule/Schedule";
+import PartyPost from "../pages/PartyPost/PartyPost";
+import UserManagement from "../pages/UserManagement.js/UserManagement";
 
 const RouterMainPage = () => {
   const User_Info = useSelector(
@@ -55,6 +57,20 @@ const RouterMainPage = () => {
       withAuthorization: true,
       withAdminAuthorization: false,
       accessCompany: ["DHKS"],
+    },
+    {
+      path: "/PartyPost",
+      element: <PartyPost></PartyPost>,
+      withAuthorization: false,
+      withAdminAuthorization: false,
+      accessCompany: ["ALL"],
+    },
+    {
+      path: "/DHK/DHKUser",
+      element: <UserManagement></UserManagement>,
+      withAuthorization: false,
+      withAdminAuthorization: false,
+      accessCompany: ["ALL"],
     },
 
     {

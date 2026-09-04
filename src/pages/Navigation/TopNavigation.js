@@ -17,13 +17,35 @@ export function TopMenu() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const MENUS = [
-    { name: "회의실 예약", path: "/", accessCompany: ["ALL"] },
-    { name: "식단표", path: "/Today_Food", accessCompany: ["ALL"] },
-    { name: "자리배치도", path: "/FloorLayout", accessCompany: ["DHKS"] },
+    {
+      name: "회의실 예약",
+      path: "/",
+      accessCompany: ["ALL"],
+      adminAccessCheck: false,
+    },
+    {
+      name: "식단표",
+      path: "/Today_Food",
+      accessCompany: ["ALL"],
+      adminAccessCheck: false,
+    },
+    {
+      name: "자리배치도",
+      path: "/FloorLayout",
+      accessCompany: ["DHKS"],
+      adminAccessCheck: false,
+    },
     {
       name: "일정 조회 및 등록",
       path: "/My_Pims",
       accessCompany: ["DHKS"],
+      adminAccessCheck: false,
+    },
+    {
+      name: "사용자 관리",
+      path: "/DHK/DHKUSer",
+      accessCompany: ["ALL"],
+      adminAccessCheck: true,
     },
   ];
 
@@ -36,12 +58,18 @@ export function TopMenu() {
     }
   };
 
-  // 💡 권한에 맞는 메뉴만 필터링 (데스크탑, 모바일 공통 사용)
-  const visibleMenus = MENUS.filter(
-    (item) =>
+  const visibleMenus = MENUS.filter((item) => {
+    // 1. 회사 권한 체크 (ALL이거나 유저의 회사와 일치)
+    const isCompanyAllowed =
       item.accessCompany.includes("ALL") ||
-      item.accessCompany.includes(LoginInfo?.company),
-  );
+      item.accessCompany.includes(LoginInfo?.company);
+
+    // 2. 관리자 권한 체크 (adminAccessCheck가 false면 통과, true면 LoginInfo.admin_access가 true여야 통과)
+    const isAdminAllowed =
+      !item.adminAccessCheck || Boolean(LoginInfo?.admin_access);
+
+    return isCompanyAllowed && isAdminAllowed;
+  });
 
   // 💡 모바일 메뉴 클릭 시 페이지 이동 및 메뉴 닫기
   const handleMobileNavClick = (path) => {
