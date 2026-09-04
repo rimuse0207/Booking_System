@@ -16,6 +16,8 @@ import FloorLayout from "../pages/FloorLayout/FloorLayout";
 import Schedule from "../pages/Schedule/Schedule";
 import PartyPost from "../pages/PartyPost/PartyPost";
 import UserManagement from "../pages/UserManagement.js/UserManagement";
+import VehiclePortal from "../components/Car_Contact/VehiclePortal";
+import VehicleContact from "../components/Car_Contact/VehicleContact";
 
 const RouterMainPage = () => {
   const User_Info = useSelector(
@@ -68,6 +70,20 @@ const RouterMainPage = () => {
     {
       path: "/DHK/DHKUser",
       element: <UserManagement></UserManagement>,
+      withAuthorization: false,
+      withAdminAuthorization: false,
+      accessCompany: ["ALL"],
+    },
+    {
+      path: "/Vehicle/Portal",
+      element: <VehiclePortal></VehiclePortal>,
+      withAuthorization: false,
+      withAdminAuthorization: false,
+      accessCompany: ["ALL"],
+    },
+    {
+      path: "/Vehicle/Contact/:car_Target_ID/:car_User_ID",
+      element: <VehicleContact></VehicleContact>,
       withAuthorization: false,
       withAdminAuthorization: false,
       accessCompany: ["ALL"],

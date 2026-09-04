@@ -44,7 +44,7 @@ export const usePartyPost = () => {
 
   const getUserList = async () => {
     const req = await Request_Get_Axios("/PartyPost/getUserList");
-    console.log(req);
+
     if (req.status) {
       setUserListOptions(req.data);
     }
