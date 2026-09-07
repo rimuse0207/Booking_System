@@ -1,11 +1,14 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import moment from "moment";
 import { useSelector } from "react-redux";
+import { useToast } from "../../constants/Toast/ToastContext";
+import { Request_Get_Axios, Request_Post_Axios } from "../../API";
 
 export const useMySchedule = () => {
   const LoginInfo = useSelector(
     (state) => state.Login_Info_Reducer_State.Login_Info,
   );
+  const { showToast } = useToast();
   const [currentMonth, setCurrentMonth] = useState(moment());
   const [selectedDate, setSelectedDate] = useState(moment());
   const [activeTab, setActiveTab] = useState("register");
@@ -56,6 +59,19 @@ export const useMySchedule = () => {
     else setSelectedDates([...selectedDates, date]);
   };
 
+  const getMyPimsData = async () => {
+    const req = await Request_Get_Axios("/ScheduleApp/getUserSchedule", {
+      selectDate: moment(currentMonth).format("YYYY-MM"),
+    });
+    if (req.status) {
+      setSchedules(req.data);
+    }
+  };
+
+  useEffect(() => {
+    getMyPimsData();
+  }, [currentMonth, activeTab]);
+
   const handleDateClick = (day) => {
     setSelectedDate(day);
     handleDatePickerChange(day.toDate());
@@ -67,10 +83,13 @@ export const useMySchedule = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedDates.length === 0)
-      return alert("일정을 추가할 날짜를 캘린더에서 선택해주세요.");
+      return showToast(
+        "일정을 추가할 날짜를 캘린더에서 선택해주세요.",
+        "error",
+      );
 
     if (formData.id) {
       const updatedSchedules = selectedDates.map((date, idx) => ({
@@ -79,11 +98,12 @@ export const useMySchedule = () => {
         startDate: moment(date).format("YYYY-MM-DD"),
         endDate: moment(date).format("YYYY-MM-DD"),
       }));
+
       setSchedules((prev) => [
         ...prev.filter((sch) => sch.id !== formData.id),
         ...updatedSchedules,
       ]);
-      alert("일정이 수정(및 추가)되었습니다.");
+      showToast("일정을 수정하였습니다.", "success");
     } else {
       const newSchedules = selectedDates.map((date, idx) => ({
         ...formData,
@@ -91,14 +111,23 @@ export const useMySchedule = () => {
         startDate: moment(date).format("YYYY-MM-DD"),
         endDate: moment(date).format("YYYY-MM-DD"),
       }));
-      setSchedules((prev) => [...prev, ...newSchedules]);
-      alert(`${selectedDates.length}개의 일정이 등록되었습니다.`);
+      const req = await Request_Post_Axios("/ScheduleApp/addUserSchedule", {
+        newSchedules,
+      });
+      if (req.status) {
+        setSchedules((prev) => [...prev, ...newSchedules]);
+        await getMyPimsData();
+        showToast(
+          `${selectedDates.length}개의 일정이 등록되었습니다.`,
+          "success",
+        );
+      }
     }
 
     setActiveTab("status");
     setFormData({
       id: null,
-      name: "유성재",
+      name: LoginInfo.name,
       category: "외근",
       client: "",
       agenda: "",
@@ -110,7 +139,7 @@ export const useMySchedule = () => {
   const handleEdit = (sch) => {
     setFormData({
       id: sch.id,
-      name: sch.name || "유성재",
+      name: sch.name || "",
       category: sch.category,
       client: sch.client || "",
       agenda: sch.agenda || "",
@@ -120,9 +149,18 @@ export const useMySchedule = () => {
     setActiveTab("register");
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm("정말로 이 일정을 삭제하시겠습니까?")) {
-      setSchedules((prev) => prev.filter((sch) => sch.id !== id));
+      const req = await Request_Post_Axios("/ScheduleApp/deleteUserSchedule", {
+        id,
+      });
+      if (req.status) {
+        setSchedules((prev) => prev.filter((sch) => sch.id !== id));
+        await getMyPimsData();
+        showToast(`일정을 삭제하였습니다.`, "success");
+      } else {
+        showToast(`일정을 삭제에 실패하였습니다.`, "error");
+      }
     }
   };
 

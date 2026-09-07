@@ -18,6 +18,7 @@ import PartyPost from "../pages/PartyPost/PartyPost";
 import UserManagement from "../pages/UserManagement.js/UserManagement";
 import VehiclePortal from "../components/Car_Contact/VehiclePortal";
 import VehicleContact from "../components/Car_Contact/VehicleContact";
+import MealSchedule from "../pages/MealPlan/MealSchedule";
 
 const RouterMainPage = () => {
   const User_Info = useSelector(
@@ -87,6 +88,13 @@ const RouterMainPage = () => {
       withAuthorization: false,
       withAdminAuthorization: false,
       accessCompany: ["ALL"],
+    },
+    {
+      path: "/Admin/BreakFast",
+      element: <MealSchedule></MealSchedule>,
+      withAuthorization: true,
+      withAdminAuthorization: false,
+      accessCompany: ["DHKS"],
     },
 
     {

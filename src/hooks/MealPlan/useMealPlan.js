@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import moment from "moment";
-import { Request_Get_Axios } from "../../API/index"; // API 모듈 경로에 맞게 수정
+import { Request_Get_Axios } from "../../API/index";
 
 export const useMealPlan = () => {
   const [baseDate, setBaseDate] = useState(moment());
@@ -28,7 +28,6 @@ export const useMealPlan = () => {
     setBaseDate((prev) => moment(prev).add(1, "weeks"));
   }, []);
 
-  // 💡 한글 요일 구하기 헬퍼 함수
   const getKoreanDay = (dateString) => {
     const days = [
       "일요일",
@@ -41,7 +40,7 @@ export const useMealPlan = () => {
     ];
     return days[moment(dateString).day()];
   };
-  // 💡 API 데이터 패칭
+
   useEffect(() => {
     const fetchMeals = async () => {
       setIsLoading(true);
@@ -55,17 +54,17 @@ export const useMealPlan = () => {
         );
         if (response.status) {
           const formattedMeals = response.data
-            // 1. 날짜가 뒤섞여 있으므로 먼저 과거 -> 미래 순으로 정렬합니다.
+
             .sort(
               (a, b) =>
                 new Date(a.food_week_menu_dates) -
                 new Date(b.food_week_menu_dates),
             )
-            // 2. 컴포넌트가 쓰기 편하게 객체 키(Key)를 예쁘게 바꿔줍니다.
+
             .map((item) => ({
               id: item.food_week_menu_indexs,
-              date: moment(item.food_week_menu_dates).format("YYYY. MM. DD"), // 화면 표시용 (예: 2025. 12. 08)
-              day: getKoreanDay(item.food_week_menu_dates), // 요일 추출
+              date: moment(item.food_week_menu_dates).format("YYYY. MM. DD"),
+              day: getKoreanDay(item.food_week_menu_dates),
               rice: item.food_week_menu_menu1,
               soup: item.food_week_menu_menu2,
               side1: item.food_week_menu_menu3,
@@ -84,7 +83,7 @@ export const useMealPlan = () => {
     };
 
     fetchMeals();
-  }, [baseDate]); // baseDate(기준 날짜)가 바뀔 때마다 다시 API 호출
+  }, [baseDate]);
 
   return {
     state: { meals, weekLabel, dateRange, isLoading },

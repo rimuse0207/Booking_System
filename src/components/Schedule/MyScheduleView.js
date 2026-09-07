@@ -3,19 +3,12 @@ import styled from "styled-components";
 import moment from "moment";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-// 💡 여기도 언어팩 필수 추가!
+
 import { ko } from "date-fns/locale";
 import { useMySchedule } from "../../hooks/Schedule/useMySchedule";
 import { STATUS_COLORS } from "../../constants/FloorLayout/FloorLayout";
 
-registerLocale("ko", ko); // 💡 한국어 등록
-
-// const CATEGORY_COLORS = {
-//   외근: "#F59E0B",
-//   연차: "#EF4444",
-//   해외출장: "#4F46E5",
-//   출근: "#10B981",
-// };
+registerLocale("ko", ko);
 
 export function MyScheduleView() {
   const { state, actions, computed } = useMySchedule();
@@ -261,9 +254,9 @@ export function MyScheduleView() {
                         </CardBody>
                       )}
                       <CardActions>
-                        <ActionBtn onClick={() => actions.handleEdit(sch)}>
+                        {/* <ActionBtn onClick={() => actions.handleEdit(sch)}>
                           수정
-                        </ActionBtn>
+                        </ActionBtn> */}
                         <ActionBtn
                           $danger
                           onClick={() => actions.handleDelete(sch.id)}

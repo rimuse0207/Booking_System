@@ -246,11 +246,9 @@ export const useReservation = () => {
     [closeDetailModal],
   );
 
-  // --- 💡 모바일 터치 및 마우스 하이브리드 드래그 처리 ---
   useEffect(() => {
     if (!dragState) return;
 
-    // e.clientX를 마우스/터치 구분해서 가져오는 헬퍼 함수
     const getClientX = (e) => {
       return e.touches && e.touches.length > 0
         ? e.touches[0].clientX
@@ -317,9 +315,7 @@ export const useReservation = () => {
         return showToast("로그인 이후 예약이 가능합니다.", "error");
       }
 
-      // 💡 [버그 픽스] 이미 드래프트(가예약 박스)가 선택된 상태에서 다른 곳을 클릭하면 무시하거나 취소 처리
       if (draft || dragState || isDraggingRef.current || isModalOpen) {
-        // 이미 박스가 띄워져 있다면 새 박스를 그리지 않는다. (기존 드래프트 유실/NaN 에러 방지)
         return;
       }
 
