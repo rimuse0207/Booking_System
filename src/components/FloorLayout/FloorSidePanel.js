@@ -196,6 +196,26 @@ export default function FloorSidePanel({
                     </InfoRow>
                   </>
                 )}
+                {selectedBoxData.status === "교육" && (
+                  <>
+                    <InfoRow>
+                      <InfoLabel>교육 장비</InfoLabel>
+                      <InfoValue>
+                        {selectedBoxData.useEquipmentName || "-"}
+                      </InfoValue>
+                    </InfoRow>
+                    <InfoRow>
+                      <InfoLabel>교육 시간</InfoLabel>
+                      <InfoValue>{`${selectedBoxData?.edStartTime}  ~ ${selectedBoxData?.edEndTime}`}</InfoValue>
+                    </InfoRow>
+                    <InfoRow>
+                      <InfoLabel>교육 안건</InfoLabel>
+                      <InfoValue>
+                        {selectedBoxData.description || "-"}
+                      </InfoValue>
+                    </InfoRow>
+                  </>
+                )}
               </InfoTable>
             </ViewInfoWrapper>
           ) : (
@@ -217,6 +237,7 @@ export default function FloorSidePanel({
                         "[)",
                       ),
                     );
+
                     if (activeRes) {
                       currentIsOccupied = true;
                       currentOccupant = activeRes.ownerName;

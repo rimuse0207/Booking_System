@@ -81,6 +81,7 @@ export default function FloorHeader({ state, actions }) {
           <LegendItem $color={STATUS_COLORS["외근"]}>외근</LegendItem>
           <LegendItem $color={STATUS_COLORS["연차"]}>연차</LegendItem>
           <LegendItem $color={STATUS_COLORS["해외출장"]}>해외출장</LegendItem>
+          <LegendItem $color={STATUS_COLORS["교육"]}>교육</LegendItem>
         </StatusLegend>
       </HeaderLeft>
 

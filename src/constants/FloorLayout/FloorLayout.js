@@ -3,5 +3,6 @@ export const STATUS_COLORS = {
   외근: "#F59E0B",
   연차: "#EF4444",
   해외출장: "rgb(79, 70, 229)",
+  교육: "#0ED3EB",
   공석: "#E2E8F0",
 };

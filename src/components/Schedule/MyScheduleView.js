@@ -3,6 +3,7 @@ import styled from "styled-components";
 import moment from "moment";
 import DatePicker, { registerLocale } from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import ReactSelect from "react-select";
 
 import { ko } from "date-fns/locale";
 import { useMySchedule } from "../../hooks/Schedule/useMySchedule";
@@ -10,8 +11,40 @@ import { STATUS_COLORS } from "../../constants/FloorLayout/FloorLayout";
 
 registerLocale("ko", ko);
 
+const TIME_OPTIONS = Array.from({ length: 24 * 2 }).map((_, i) => {
+  const hour = String(Math.floor(i / 2)).padStart(2, "0");
+  const minute = i % 2 === 0 ? "00" : "30";
+  const timeString = `${hour}:${minute}`;
+  return { value: timeString, label: timeString };
+});
+
+const selectStyles = {
+  control: (base, state) => ({
+    ...base,
+    padding: "2px",
+    borderRadius: "8px",
+    borderColor: state.isFocused ? "#0ea5e9" : "#cbd5e1",
+    boxShadow: state.isFocused ? "0 0 0 3px rgba(14, 165, 233, 0.1)" : "none",
+    "&:hover": {
+      borderColor: state.isFocused ? "#0ea5e9" : "#cbd5e1",
+    },
+  }),
+  menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+};
+
+const EQUIPMENT_OPTIONS = [
+  { value: "DFD6361", label: "DFD6361" },
+  { value: "DGP8761", label: "DGP8761" },
+];
+
 export function MyScheduleView() {
   const { state, actions, computed } = useMySchedule();
+
+  const handleCustomChange = (name, value) => {
+    actions.handleFormChange({
+      target: { name, value },
+    });
+  };
 
   return (
     <LayoutWrapper>
@@ -71,7 +104,7 @@ export function MyScheduleView() {
                           >
                             {sch.category === "연차"
                               ? "[연차]"
-                              : `[${sch.category}] ${sch.client || sch.agenda}`}
+                              : `[${sch.category}] ${sch.agenda || sch.client || sch.equipment || ""}`}
                           </ScheduleBadge>
                         ))}
                       </ScheduleArea>
@@ -124,13 +157,18 @@ export function MyScheduleView() {
                     <option value="외근">외근</option>
                     <option value="해외출장">해외출장</option>
                     <option value="연차">연차</option>
+                    <option value="교육">교육</option>
                   </Select>
                 </FormGroup>
               </FormRow>
 
               <FormGroup style={{ alignItems: "center" }}>
                 <Label style={{ width: "100%", marginBottom: "4px" }}>
-                  일정 선택 (다중 선택 가능)
+                  일정 선택 (
+                  {state.formData.category === "교육"
+                    ? "단일 선택"
+                    : "다중 선택 가능"}
+                  )
                 </Label>
                 <DatePickerWrapper>
                   <DatePicker
@@ -143,7 +181,7 @@ export function MyScheduleView() {
                         ? "custom-selected"
                         : undefined
                     }
-                    locale="ko" // 💡 언어 설정 적용 확인
+                    locale="ko"
                     formatWeekDay={(n) => n.substring(0, 1)}
                   />
                 </DatePickerWrapper>
@@ -167,53 +205,149 @@ export function MyScheduleView() {
                 )}
               </FormGroup>
 
-              {state.formData.category !== "연차" && (
+              {/* 교육 카테고리 폼 항목 */}
+              {state.formData.category === "교육" && (
                 <>
+                  <FormRow>
+                    <FormGroup>
+                      <Label>시작 시간 (직접 입력 가능)</Label>
+                      <ReactSelect
+                        options={TIME_OPTIONS}
+                        value={
+                          TIME_OPTIONS.find(
+                            (op) => op.value === state.formData.startTime,
+                          ) || null
+                        }
+                        onChange={(selected) => {
+                          handleCustomChange(
+                            "startTime",
+                            selected ? selected.value : "",
+                          );
+                          // 시작 시간이 종료 시간보다 이후면 종료 시간 초기화
+                          if (
+                            selected &&
+                            state.formData.endTime &&
+                            selected.value >= state.formData.endTime
+                          ) {
+                            handleCustomChange("endTime", "");
+                          }
+                        }}
+                        placeholder="예: 14:00"
+                        isClearable
+                        menuPortalTarget={document.body}
+                        styles={selectStyles}
+                        noOptionsMessage={() => "검색 결과가 없습니다."}
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>종료 시간 (직접 입력 가능)</Label>
+                      <ReactSelect
+                        options={
+                          state.formData.startTime
+                            ? TIME_OPTIONS.filter(
+                                (op) => op.value > state.formData.startTime,
+                              )
+                            : TIME_OPTIONS
+                        }
+                        value={
+                          TIME_OPTIONS.find(
+                            (op) => op.value === state.formData.endTime,
+                          ) || null
+                        }
+                        onChange={(selected) =>
+                          handleCustomChange(
+                            "endTime",
+                            selected ? selected.value : "",
+                          )
+                        }
+                        placeholder="예: 15:30"
+                        isClearable
+                        menuPortalTarget={document.body}
+                        styles={selectStyles}
+                        noOptionsMessage={() =>
+                          state.formData.startTime
+                            ? "시작 시간 이후로 선택해주세요."
+                            : "검색 결과가 없습니다."
+                        }
+                      />
+                    </FormGroup>
+                  </FormRow>
                   <FormGroup>
-                    <Label>고객사</Label>
-                    <Input
-                      type="text"
-                      name="client"
-                      value={state.formData.client}
-                      onChange={actions.handleFormChange}
-                      placeholder="고객사 명"
+                    <Label>사용 장비</Label>
+                    <ReactSelect
+                      options={EQUIPMENT_OPTIONS}
+                      value={
+                        EQUIPMENT_OPTIONS.find(
+                          (op) => op.value === state.formData.equipment,
+                        ) || null
+                      }
+                      onChange={(selected) =>
+                        handleCustomChange(
+                          "equipment",
+                          selected ? selected.value : "",
+                        )
+                      }
+                      placeholder="장비를 검색하거나 선택하세요"
+                      isClearable
+                      menuPortalTarget={document.body}
+                      styles={selectStyles}
                     />
                   </FormGroup>
+
+                  {/* 💡 신규 추가: 교육 내용 (기존 agenda 재사용) */}
                   <FormGroup>
-                    <Label>동행자</Label>
-                    <Input
-                      type="text"
-                      name="companions"
-                      value={state.formData.companions}
-                      onChange={actions.handleFormChange}
-                      placeholder="예: 김철수 프로"
-                    />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>안건</Label>
+                    <Label>교육 내용</Label>
                     <TextArea
                       name="agenda"
                       value={state.formData.agenda}
                       onChange={actions.handleFormChange}
-                      placeholder="안건 상세 내용"
+                      placeholder="교육 상세 내용을 입력하세요"
                     />
                   </FormGroup>
                 </>
               )}
+
+              {/* 외근, 해외출장 카테고리 폼 항목 */}
+              {state.formData.category !== "연차" &&
+                state.formData.category !== "교육" && (
+                  <>
+                    <FormGroup>
+                      <Label>고객사</Label>
+                      <Input
+                        type="text"
+                        name="client"
+                        value={state.formData.client}
+                        onChange={actions.handleFormChange}
+                        placeholder="고객사 명"
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>동행자</Label>
+                      <Input
+                        type="text"
+                        name="companions"
+                        value={state.formData.companions}
+                        onChange={actions.handleFormChange}
+                        placeholder="예: 김철수 프로"
+                      />
+                    </FormGroup>
+                    <FormGroup>
+                      <Label>안건</Label>
+                      <TextArea
+                        name="agenda"
+                        value={state.formData.agenda}
+                        onChange={actions.handleFormChange}
+                        placeholder="안건 상세 내용"
+                      />
+                    </FormGroup>
+                  </>
+                )}
 
               <SubmitButton type="submit">
                 {state.formData.id
                   ? "일정 수정 완료"
                   : `선택한 ${state.selectedDates.length}일 일정 등록`}
               </SubmitButton>
-              {state.formData.id && (
-                <CancelButton
-                  type="button"
-                  onClick={() => actions.setActiveTab("status")}
-                >
-                  수정 취소
-                </CancelButton>
-              )}
             </Form>
           ) : (
             <StatusList>
@@ -236,27 +370,53 @@ export function MyScheduleView() {
                           <CardDate>{sch.startDate}</CardDate>
                         </CardTitleGroup>
                       </CardHeader>
+
                       {sch.category !== "연차" && (
                         <CardBody>
-                          {sch.client && (
-                            <CardRow>
-                              <strong>고객사:</strong> {sch.client}
-                            </CardRow>
+                          {/* 외근, 해외출장 카드 정보 */}
+                          {sch.category !== "교육" && (
+                            <>
+                              {sch.client && (
+                                <CardRow>
+                                  <strong>고객사:</strong> {sch.client}
+                                </CardRow>
+                              )}
+                              <CardRow>
+                                <strong>안건:</strong> {sch.agenda || "-"}
+                              </CardRow>
+                              {sch.companions && (
+                                <CardRow>
+                                  <strong>동행자:</strong> {sch.companions}
+                                </CardRow>
+                              )}
+                            </>
                           )}
-                          <CardRow>
-                            <strong>안건:</strong> {sch.agenda || "-"}
-                          </CardRow>
-                          {sch.companions && (
-                            <CardRow>
-                              <strong>동행자:</strong> {sch.companions}
-                            </CardRow>
+
+                          {/* 💡 교육 카드 정보 (내용 추가) */}
+                          {sch.category === "교육" && (
+                            <>
+                              {(sch.startTime || sch.endTime) && (
+                                <CardRow>
+                                  <strong>시간:</strong> {sch.startTime || "-"}{" "}
+                                  ~ {sch.endTime || "-"}
+                                </CardRow>
+                              )}
+                              {sch.equipment && (
+                                <CardRow>
+                                  <strong>사용 장비:</strong> {sch.equipment}
+                                </CardRow>
+                              )}
+                              {sch.agenda && (
+                                <CardRow>
+                                  <strong>교육 내용:</strong> {sch.agenda}
+                                </CardRow>
+                              )}
+                            </>
                           )}
                         </CardBody>
                       )}
+
                       <CardActions>
-                        {/* <ActionBtn onClick={() => actions.handleEdit(sch)}>
-                          수정
-                        </ActionBtn> */}
                         <ActionBtn
                           $danger
                           onClick={() => actions.handleDelete(sch.id)}
@@ -275,7 +435,7 @@ export function MyScheduleView() {
   );
 }
 
-// Styled Components
+// === 이하 스타일 컴포넌트 생략 없이 전체 포함 ===
 const LayoutWrapper = styled.div`
   display: flex;
   gap: 32px;
@@ -703,19 +863,6 @@ const SubmitButton = styled.button`
   cursor: pointer;
   &:hover {
     background-color: #0284c7;
-  }
-`;
-const CancelButton = styled.button`
-  background-color: #f1f5f9;
-  color: #475569;
-  font-size: 1rem;
-  font-weight: 700;
-  border: 1px solid #cbd5e1;
-  padding: 14px;
-  border-radius: 8px;
-  cursor: pointer;
-  &:hover {
-    background-color: #e2e8f0;
   }
 `;
 const StatusList = styled.div`

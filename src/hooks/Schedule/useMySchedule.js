@@ -13,17 +13,23 @@ export const useMySchedule = () => {
   const [selectedDate, setSelectedDate] = useState(moment());
   const [activeTab, setActiveTab] = useState("register");
   const [selectedDates, setSelectedDates] = useState([]);
-
   const [schedules, setSchedules] = useState([]);
 
-  const [formData, setFormData] = useState({
+  // 💡 초기 폼 상태를 분리해두면 리셋할 때 편리합니다.
+  const initialFormData = {
     id: null,
     name: LoginInfo.name,
     category: "외근",
     client: "",
     agenda: "",
     companions: "",
-  });
+    // 💡 교육 관련 필드 추가
+    startTime: "",
+    endTime: "",
+    equipment: "",
+  };
+
+  const [formData, setFormData] = useState(initialFormData);
 
   const calendarWeeks = useMemo(() => {
     const startDay = currentMonth.clone().startOf("month").startOf("week");
@@ -46,17 +52,28 @@ export const useMySchedule = () => {
   const nextMonth = () => setCurrentMonth(currentMonth.clone().add(1, "month"));
   const goToday = () => setCurrentMonth(moment());
 
+  // 💡 날짜 선택 로직: 교육은 단일 선택, 나머지는 다중 선택
   const handleDatePickerChange = (date) => {
-    const dateStr = moment(date).format("YYYY-MM-DD");
-    const isAlreadySelected = selectedDates.some(
-      (d) => moment(d).format("YYYY-MM-DD") === dateStr,
-    );
-
-    if (isAlreadySelected)
-      setSelectedDates(
-        selectedDates.filter((d) => moment(d).format("YYYY-MM-DD") !== dateStr),
+    if (formData.category === "교육") {
+      // 교육일 경우 단일 선택 (기존 배열 덮어쓰기)
+      setSelectedDates([date]);
+    } else {
+      // 그 외 카테고리는 다중 선택 (토글 로직)
+      const dateStr = moment(date).format("YYYY-MM-DD");
+      const isAlreadySelected = selectedDates.some(
+        (d) => moment(d).format("YYYY-MM-DD") === dateStr,
       );
-    else setSelectedDates([...selectedDates, date]);
+
+      if (isAlreadySelected) {
+        setSelectedDates(
+          selectedDates.filter(
+            (d) => moment(d).format("YYYY-MM-DD") !== dateStr,
+          ),
+        );
+      } else {
+        setSelectedDates([...selectedDates, date]);
+      }
+    }
   };
 
   const getMyPimsData = async () => {
@@ -81,6 +98,10 @@ export const useMySchedule = () => {
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "category" && value === "교육" && selectedDates.length > 1) {
+      setSelectedDates([selectedDates[0]]);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -111,6 +132,7 @@ export const useMySchedule = () => {
         startDate: moment(date).format("YYYY-MM-DD"),
         endDate: moment(date).format("YYYY-MM-DD"),
       }));
+
       const req = await Request_Post_Axios("/ScheduleApp/addUserSchedule", {
         newSchedules,
       });
@@ -125,14 +147,7 @@ export const useMySchedule = () => {
     }
 
     setActiveTab("status");
-    setFormData({
-      id: null,
-      name: LoginInfo.name,
-      category: "외근",
-      client: "",
-      agenda: "",
-      companions: "",
-    });
+    setFormData(initialFormData);
     setSelectedDates([]);
   };
 
@@ -144,6 +159,9 @@ export const useMySchedule = () => {
       client: sch.client || "",
       agenda: sch.agenda || "",
       companions: sch.companions || "",
+      startTime: sch.startTime || "",
+      endTime: sch.endTime || "",
+      equipment: sch.equipment || "",
     });
     setSelectedDates([moment(sch.startDate).toDate()]);
     setActiveTab("register");
@@ -155,6 +173,7 @@ export const useMySchedule = () => {
         id,
       });
       if (req.status) {
+        console.log(id, schedules);
         setSchedules((prev) => prev.filter((sch) => sch.id !== id));
         await getMyPimsData();
         showToast(`일정을 삭제하였습니다.`, "success");
