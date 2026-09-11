@@ -113,8 +113,14 @@ export const useAllSchedule = () => {
         !filters.department.includes(row.department)
       )
         return false;
-      if (filters.team.length > 0 && !filters.team.includes(row.team))
+      if (
+        filters.team.length > 0 &&
+        !filters.team.some((filterItem) =>
+          row.team?.toLowerCase().includes(filterItem?.toLowerCase()),
+        )
+      ) {
         return false;
+      }
       if (
         filters.category.length > 0 &&
         !filters.category.includes(row.division)
