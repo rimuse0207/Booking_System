@@ -18,7 +18,7 @@ export const FILTER_OPTIONS = {
     "기술교육팀",
     "안전팀",
   ],
-  category: ["외근", "해외출장", "연차", "출근"],
+  category: ["외근", "해외출장", "연차", "교육", "출근"],
 };
 
 export const useAllSchedule = () => {
@@ -27,7 +27,7 @@ export const useAllSchedule = () => {
     location: [],
     department: [],
     team: [],
-    category: ["외근", "해외출장", "연차"],
+    category: ["외근", "해외출장", "연차", "교육"],
   });
   const [allSchedule, setAllSchedule] = useState([]);
 

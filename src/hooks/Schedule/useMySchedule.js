@@ -52,27 +52,18 @@ export const useMySchedule = () => {
   const nextMonth = () => setCurrentMonth(currentMonth.clone().add(1, "month"));
   const goToday = () => setCurrentMonth(moment());
 
-  // 💡 날짜 선택 로직: 교육은 단일 선택, 나머지는 다중 선택
   const handleDatePickerChange = (date) => {
-    if (formData.category === "교육") {
-      // 교육일 경우 단일 선택 (기존 배열 덮어쓰기)
-      setSelectedDates([date]);
-    } else {
-      // 그 외 카테고리는 다중 선택 (토글 로직)
-      const dateStr = moment(date).format("YYYY-MM-DD");
-      const isAlreadySelected = selectedDates.some(
-        (d) => moment(d).format("YYYY-MM-DD") === dateStr,
-      );
+    const dateStr = moment(date).format("YYYY-MM-DD");
+    const isAlreadySelected = selectedDates.some(
+      (d) => moment(d).format("YYYY-MM-DD") === dateStr,
+    );
 
-      if (isAlreadySelected) {
-        setSelectedDates(
-          selectedDates.filter(
-            (d) => moment(d).format("YYYY-MM-DD") !== dateStr,
-          ),
-        );
-      } else {
-        setSelectedDates([...selectedDates, date]);
-      }
+    if (isAlreadySelected) {
+      setSelectedDates(
+        selectedDates.filter((d) => moment(d).format("YYYY-MM-DD") !== dateStr),
+      );
+    } else {
+      setSelectedDates([...selectedDates, date]);
     }
   };
 

@@ -164,11 +164,7 @@ export function MyScheduleView() {
 
               <FormGroup style={{ alignItems: "center" }}>
                 <Label style={{ width: "100%", marginBottom: "4px" }}>
-                  일정 선택 (
-                  {state.formData.category === "교육"
-                    ? "단일 선택"
-                    : "다중 선택 가능"}
-                  )
+                  일정 선택 ( 다중 선택 가능 )
                 </Label>
                 <DatePickerWrapper>
                   <DatePicker
