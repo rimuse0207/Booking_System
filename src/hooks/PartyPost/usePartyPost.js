@@ -77,6 +77,10 @@ export const usePartyPost = () => {
         time: moment(p.time).format("HH:mm"),
       })),
     };
+    if (!selectUser) {
+      alert("당직자를 먼저 선택 해 주세요");
+      return;
+    }
     const req = await Request_Post_Axios("/PartyPost/savePartyPost", {
       submitData,
       selectUser,

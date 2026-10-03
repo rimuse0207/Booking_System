@@ -138,7 +138,7 @@ export const useReservation = () => {
             date: dateStr,
           }),
         ]);
-
+        console.log(roomsRes, reservationsRes);
         if (roomsRes?.data) setRooms(roomsRes.data);
         if (reservationsRes?.data) setReservations(reservationsRes.data);
       } catch (error) {
