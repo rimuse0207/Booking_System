@@ -86,18 +86,18 @@ export const usePartyPost = () => {
       selectUser,
     });
     if (req.status) {
-      if (!req.data.smsResult) {
-        alert("메시지 전송 실패하였습니다. 개인 메세지로 발송 바랍니다.");
-      }
-      if (!req.data.mailResult) {
-        alert("메시지 전송 실패하였습니다. 개인 메세지로 발송 바랍니다.");
-      }
-      if (req.data.smsResult && req.data.mailResult) {
-        alert("메시지 전송 성공 고생 하셨습니다.");
-      }
-    }
+      // if (!req.data.smsResult) {
+      //   alert("메시지 전송 실패하였습니다. 개인 메세지로 발송 바랍니다.");
+      // }
+      // if (!req.data.mailResult) {
+      //   alert("메시지 전송 실패하였습니다. 개인 메세지로 발송 바랍니다.");
+      // }
+      // if (req.data.smsResult && req.data.mailResult) {
+      //   alert("메시지 전송 성공 고생 하셨습니다.");
+      // }
 
-    alert("당직일지가 성공적으로 등록되었습니다.");
+      alert("당직일지가 성공적으로 등록되었습니다.");
+    }
   };
 
   return {
