@@ -19,6 +19,8 @@ import UserManagement from "../pages/UserManagement.js/UserManagement";
 import VehiclePortal from "../components/Car_Contact/VehiclePortal";
 import VehicleContact from "../components/Car_Contact/VehicleContact";
 import MealSchedule from "../pages/MealPlan/MealSchedule";
+import CallHistory from "../pages/CallHistory/CallHistory";
+import AdminPage from "../pages/CallHistory/Admin/AdminPage";
 
 const RouterMainPage = () => {
   const User_Info = useSelector(
@@ -61,6 +63,21 @@ const RouterMainPage = () => {
       withAdminAuthorization: false,
       accessCompany: ["DHKS"],
     },
+    {
+      path: "/CallHistory",
+      element: <CallHistory></CallHistory>,
+      withAuthorization: true,
+      withAdminAuthorization: false,
+      accessCompany: ["DHKS"],
+    },
+    {
+      path: "/Admin/CallHistory",
+      element: <AdminPage></AdminPage>,
+      withAuthorization: true,
+      withAdminAuthorization: false,
+      accessCompany: ["DHKS"],
+    },
+
     {
       path: "/PartyPost",
       element: <PartyPost></PartyPost>,

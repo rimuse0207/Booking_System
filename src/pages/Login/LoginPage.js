@@ -13,9 +13,7 @@ export default function LoginPage() {
       <LoginCard>
         <Header>
           <Badge>{COMPANY_NAME}</Badge>
-          <Title>
-            {step === 1 ? "회의실 예약 로그인" : "비밀번호 변경 안내"}
-          </Title>
+          <Title>{step === 1 ? "로그인" : "비밀번호 변경 안내"}</Title>
           <Subtitle>
             {step === 1
               ? "회의실 예약 및 기타 사용을 위해서는 로그인이 필수 입니다."

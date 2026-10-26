@@ -9,7 +9,6 @@ import FloorSidePanel from "../../components/FloorLayout/FloorSidePanel";
 export default function FloorLayout() {
   const { state, actions } = useFloorLayout();
 
-  // 파생 데이터 (Derived State)
   const selectedBoxData = state.boxes.find((b) => b.id === state.selectedBox);
   const filteredBoxes = state.boxes.filter(
     (b) => b.office === state.selectedOffice && b.floor === state.currentFloor,
@@ -24,11 +23,9 @@ export default function FloorLayout() {
       <TopMenu />
 
       <ContentContainer>
-        {/* 💡 1. 상단 컨트롤 헤더 */}
         <FloorHeader state={state} actions={actions} />
 
         <Workspace>
-          {/* 💡 2. 도면 캔버스 영역 */}
           <FloorCanvas
             filteredBoxes={filteredBoxes}
             isEditMode={state.isEditMode}
@@ -36,7 +33,6 @@ export default function FloorLayout() {
             actions={actions}
           />
 
-          {/* 💡 3. 우측 속성/정보 패널 */}
           <FloorSidePanel
             selectedBoxData={selectedBoxData}
             isEditMode={state.isEditMode}
