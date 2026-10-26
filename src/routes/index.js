@@ -116,7 +116,7 @@ const RouterMainPage = () => {
 
     {
       path: "*",
-      element: <Navigate to="/Home"></Navigate>,
+      element: <Navigate to="/"></Navigate>,
       withAuthorization: true,
       withAdminAuthorization: false,
       accessCompany: ["ALL"],
