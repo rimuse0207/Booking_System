@@ -114,7 +114,7 @@ export function AllScheduleView() {
               <Th style={{ width: "25px" }}>부서</Th>
               <Th style={{ width: "65px" }}>팀명</Th>
               <Th style={{ width: "40px" }}>이름</Th>
-              <Th style={{ width: "40px" }}>구분</Th>
+              <Th style={{ width: "60px" }}>구분</Th>
               <Th>고객사</Th>
               <Th>안건</Th>
               <Th>동행자</Th>
