@@ -36,7 +36,7 @@ export function useUserCallHistory() {
     start_min: "00",
     end_hour: "18",
     end_min: "00",
-    category: { value: "시간외", label: "시간외" },
+    category: { value: "시간 외", label: "시간 외" },
     content: "",
   };
 
@@ -133,7 +133,7 @@ export function useUserCallHistory() {
       start_time: `${form.start_hour}:${form.start_min}`,
       end_time: `${form.end_hour}:${form.end_min}`,
       response_date: moment(form.response_date).format("YYYY. MM. DD"),
-      category: form.category?.value || "시간외",
+      category: form.category?.value || "시간 외",
     };
 
     try {

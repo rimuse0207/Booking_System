@@ -60,7 +60,7 @@ export const useLogin = () => {
         setIsLoading(false);
         return;
       }
-
+      console.log(res);
       if (res.data.dataSuccess) {
         localStorage.setItem("Token", res.data.token);
         localStorage.setItem(
@@ -74,6 +74,7 @@ export const useLogin = () => {
             company: res.data.result.brity_works_user_info_company,
             admin_access:
               res.data.result.brity_works_user_info_amdin_access === 1,
+            team: res.data?.result?.departmentName || "",
           }),
         );
         setIsLoading(false);

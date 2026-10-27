@@ -72,7 +72,7 @@ export default function MasterModal({ modal, setModal, currentSites, onSave }) {
               <Input
                 value={formData.team_name || ""}
                 onChange={(e) => handleChange("team_name", e.target.value)}
-                placeholder="예: IT인프라팀"
+                placeholder="OASIS 등록 부서명"
               />
             </InputGroup>
           )}

@@ -20,7 +20,7 @@ export default function SupportForm({ state, actions }) {
   const { handleFormChange, handleSubmit, setModalType } = actions;
 
   const categoryOptions = [
-    { value: "시간외", label: "시간외" },
+    { value: "시간 외", label: "시간 외" },
     { value: "휴가", label: "휴가" },
     { value: "주말", label: "주말" },
   ];

@@ -3,18 +3,16 @@ import styled from "styled-components";
 import * as XLSX from "xlsx"; // 💡 엑셀 라이브러리 임포트
 
 export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
-  // 💡 엑셀 다운로드 실행 함수
   const handleExcelDownload = () => {
     if (logs.length === 0) {
       alert("다운로드할 데이터가 없습니다.");
       return;
     }
 
-    // 1. 엑셀용 데이터 가공 (한글 헤더 매핑)
     const excelData = logs.map((log) => ({
       대응일자: log.response_date,
       "소속 팀": log.team_name,
-      대응자: log.responder,
+      대응자: log.responderName,
       고객사: log.company_name,
       "사이트(지역)": log.site_name,
       "장비 모델": log.equipment_name,
@@ -25,10 +23,8 @@ export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
       "상세 내용": log.content,
     }));
 
-    // 2. 워크시트 및 워크북 생성
     const worksheet = XLSX.utils.json_to_sheet(excelData);
 
-    // 열 너비(셀 크기) 자동 조절 옵션
     worksheet["!cols"] = [
       { wch: 15 }, // 대응일자
       { wch: 15 }, // 소속 팀
@@ -57,7 +53,7 @@ export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
         <TitleBox>
           <Title>근무 외 대응 이력 현황</Title>
           <Badge>총 {logs.length}건</Badge>
-          {/* 💡 엑셀 다운로드 버튼 추가 */}
+
           <ExcelBtn onClick={handleExcelDownload} disabled={logs.length === 0}>
             📗 Excel 다운로드
           </ExcelBtn>
@@ -104,7 +100,7 @@ export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
                 <tr key={log.id}>
                   <td className="center">{log.response_date}</td>
                   <td className="center">{log.team_name}</td>
-                  <td className="center bold">{log.responder}</td>
+                  <td className="center bold">{log.responderName}</td>
                   <td>
                     {log.company_name} <br />
                     <span className="sub">{log.site_name}</span>

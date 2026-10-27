@@ -4,6 +4,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import styled from "styled-components";
 import { COMPANY_NAME } from "../../constants/index";
 import { Logout_Inistate_State_Func } from "../../models/LoginInfoReducer/LoginInfoReduce";
+import { ExceptCE, ExceptIT } from "../../configs/AccessLists";
 
 export function TopMenu() {
   const navigate = useNavigate();
@@ -21,30 +22,42 @@ export function TopMenu() {
       name: "회의실 예약",
       path: "/",
       accessCompany: ["ALL"],
+      accessDepartment: ["ALL"],
       adminAccessCheck: false,
     },
     {
       name: "식단표",
       path: "/Today_Food",
       accessCompany: ["ALL"],
+      accessDepartment: ["ALL"],
       adminAccessCheck: false,
     },
     {
       name: "자리배치도",
       path: "/FloorLayout",
       accessCompany: ["DHKS"],
+      accessDepartment: ["ALL"],
       adminAccessCheck: false,
     },
     {
       name: "일정 조회 및 등록",
       path: "/My_Pims",
       accessCompany: ["DHKS"],
+      accessDepartment: ["ALL"],
+      adminAccessCheck: false,
+    },
+    {
+      name: "근무 외 대응 이력 관리",
+      path: "/CallHistory",
+      accessCompany: ["DHKS"],
+      accessDepartment: ExceptCE.concat(ExceptIT),
       adminAccessCheck: false,
     },
     {
       name: "사용자 관리",
       path: "/DHK/DHKUSer",
       accessCompany: ["ALL"],
+      accessDepartment: ["ALL"],
       adminAccessCheck: true,
     },
   ];
@@ -59,19 +72,24 @@ export function TopMenu() {
   };
 
   const visibleMenus = MENUS.filter((item) => {
-    // 1. 회사 권한 체크 (ALL이거나 유저의 회사와 일치)
+    // 1. 회사 권한 체크
     const isCompanyAllowed =
       item.accessCompany.includes("ALL") ||
       item.accessCompany.includes(LoginInfo?.company);
 
-    // 2. 관리자 권한 체크 (adminAccessCheck가 false면 통과, true면 LoginInfo.admin_access가 true여야 통과)
+    // 2. 부서 권한 체크 (추가된 로직)
+    const isDepartmentAllowed =
+      !item.accessDepartment ||
+      item.accessDepartment.includes("ALL") ||
+      item.accessDepartment.includes(LoginInfo?.team);
+
+    // 3. 관리자 권한 체크
     const isAdminAllowed =
       !item.adminAccessCheck || Boolean(LoginInfo?.admin_access);
 
-    return isCompanyAllowed && isAdminAllowed;
+    return isCompanyAllowed && isDepartmentAllowed && isAdminAllowed;
   });
 
-  // 💡 모바일 메뉴 클릭 시 페이지 이동 및 메뉴 닫기
   const handleMobileNavClick = (path) => {
     navigate(path);
     setIsMobileMenuOpen(false);
@@ -82,7 +100,6 @@ export function TopMenu() {
       <Nav>
         <Logo onClick={() => navigate("/")}>{COMPANY_NAME}</Logo>
 
-        {/* 💡 데스크탑 전용 메뉴 */}
         <NavLinks>
           {visibleMenus.map((menu) => {
             const isActive =
@@ -117,7 +134,6 @@ export function TopMenu() {
             </LoginPrompt>
           )}
 
-          {/* 💡 모바일 햄버거 버튼 */}
           <HamburgerBtn onClick={() => setIsMobileMenuOpen(true)}>
             <span />
             <span />
@@ -126,7 +142,6 @@ export function TopMenu() {
         </RightSection>
       </Nav>
 
-      {/* 💡 모바일 사이드 메뉴 영역 */}
       <MobileOverlay
         $isOpen={isMobileMenuOpen}
         onClick={() => setIsMobileMenuOpen(false)}
@@ -156,7 +171,6 @@ export function TopMenu() {
           })}
         </MobileNavLinks>
 
-        {/* 모바일 화면에서는 사용자 정보 하단에 배치 */}
         {LoginInfo && LoginInfo.name && (
           <MobileUserSection>
             <MobileUserName>{LoginInfo.name} 님</MobileUserName>
