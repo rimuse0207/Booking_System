@@ -31,6 +31,8 @@ export default function AdminPage() {
     handleMasterDelete,
     handlePrevMonth,
     handleNextMonth,
+    handleUpdateLog,
+    handleDeleteLog,
   } = actions;
 
   const [activeTab, setActiveTab] = useState("logs");
@@ -207,6 +209,9 @@ export default function AdminPage() {
             selectedMonth={selectedMonth}
             onPrev={handlePrevMonth}
             onNext={handleNextMonth}
+            onUpdate={handleUpdateLog}
+            onDelete={handleDeleteLog}
+            masterData={{ companies, sites, equipments }}
           />
         )}
 

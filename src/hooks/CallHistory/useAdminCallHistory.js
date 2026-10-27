@@ -96,6 +96,39 @@ export function useAdminCallHistory() {
     }
   };
 
+  const handleUpdateLog = async (updatedData) => {
+    try {
+      const res = await Request_Post_Axios(
+        "/CallHistory/updateSupportLog",
+        updatedData,
+      );
+      if (res.status) {
+        alert("성공적으로 수정되었습니다.");
+        loadSupportLogs(); // 목록 새로고침
+        return true;
+      }
+    } catch (error) {
+      alert("수정에 실패했습니다.");
+    }
+    return false;
+  };
+
+  // 💡 대응 이력 삭제 API 연결
+  const handleDeleteLog = async (id) => {
+    if (!window.confirm("정말 이 이력을 삭제하시겠습니까?")) return;
+    try {
+      const res = await Request_Post_Axios("/CallHistory/deleteSupportLog", {
+        id,
+      });
+      if (res.status) {
+        alert("삭제되었습니다.");
+        loadSupportLogs(); // 목록 새로고침
+      }
+    } catch (error) {
+      alert("삭제에 실패했습니다.");
+    }
+  };
+
   return {
     state: { teams, companies, sites, equipments, logs, selectedMonth },
     actions: {
@@ -103,6 +136,8 @@ export function useAdminCallHistory() {
       handleMasterDelete,
       handlePrevMonth,
       handleNextMonth,
+      handleUpdateLog, // 💡 추가됨
+      handleDeleteLog,
     },
   };
 }

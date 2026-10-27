@@ -1,8 +1,30 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
-import * as XLSX from "xlsx"; // 💡 엑셀 라이브러리 임포트
+import * as XLSX from "xlsx";
+import EditLogModal from "../Modal/EditLogModal";
 
-export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
+export default function AdminLogTable({
+  logs,
+  selectedMonth,
+  onPrev,
+  onNext,
+  onUpdate,
+  onDelete,
+  masterData,
+}) {
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null);
+
+  const handleEditClick = (log) => {
+    setSelectedLog(log);
+    setEditModalOpen(true);
+  };
+
+  const onSaveEdit = async (updatedData) => {
+    const success = await onUpdate(updatedData);
+    if (success) setEditModalOpen(false);
+  };
+
   const handleExcelDownload = () => {
     if (logs.length === 0) {
       alert("다운로드할 데이터가 없습니다.");
@@ -79,6 +101,7 @@ export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
               <th>지원 시간</th>
               <th>구분</th>
               <th className="content-col">상세 내용</th>
+              <th>관리</th>
             </tr>
           </thead>
           <tbody>
@@ -114,15 +137,57 @@ export default function AdminLogTable({ logs, selectedMonth, onPrev, onNext }) {
                     <CatBadge>{log.category}</CatBadge>
                   </td>
                   <td className="content-col">{log.content}</td>
+                  <td className="center">
+                    <ActionBox>
+                      <ManageBtn onClick={() => handleEditClick(log)}>
+                        수정
+                      </ManageBtn>
+                      <DeleteBtn onClick={() => onDelete(log.id)}>
+                        삭제
+                      </DeleteBtn>
+                    </ActionBox>
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </StyledTable>
       </TableContainer>
+      <EditLogModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        logData={selectedLog}
+        onSave={onSaveEdit}
+        masterData={masterData}
+      />
     </TableWrapper>
   );
 }
+
+const ActionBox = styled.div`
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+`;
+const ManageBtn = styled.button`
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  cursor: pointer;
+  &:hover {
+    background: #e2e8f0;
+  }
+`;
+const DeleteBtn = styled(ManageBtn)`
+  color: #ef4444;
+  &:hover {
+    background: #fef2f2;
+    border-color: #fecaca;
+  }
+`;
 
 // --- Styled Components ---
 const TableWrapper = styled.div`

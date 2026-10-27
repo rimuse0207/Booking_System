@@ -1,11 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import moment from "moment";
+import EditLogModal from "./Modal/EditLogModal";
 
 export default function SupportList({ state, actions }) {
-  const { logs, selectedMonth, isValidTeam } = state;
-  const { setSelectedMonth, handleCopyLog } = actions;
+  const { logs, selectedMonth, isValidTeam, companies, sites, equipments } =
+    state;
+  const { setSelectedMonth, handleCopyLog, handleUpdateLog, handleDeleteLog } =
+    actions;
 
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [selectedLog, setSelectedLog] = useState(null);
+
+  const handleEditClick = (log) => {
+    setSelectedLog(log);
+    setEditModalOpen(true);
+  };
+
+  const onSaveEdit = async (updatedData) => {
+    const success = await handleUpdateLog(updatedData);
+    if (success) setEditModalOpen(false);
+  };
   const handlePrevMonth = () => {
     const prev = moment(selectedMonth + ".01", "YYYY. MM.DD")
       .subtract(1, "month")
@@ -18,6 +33,25 @@ export default function SupportList({ state, actions }) {
       .add(1, "month")
       .format("YYYY. MM");
     setSelectedMonth(next);
+  };
+
+  const calculateDuration = (startTime, endTime) => {
+    if (!startTime || !endTime) return "";
+
+    const start = moment(startTime, "HH:mm");
+    const end = moment(endTime, "HH:mm");
+
+    if (end.isBefore(start)) {
+      end.add(1, "days");
+    }
+
+    const diffMinutes = end.diff(start, "minutes");
+    const hours = Math.floor(diffMinutes / 60);
+    const minutes = diffMinutes % 60;
+
+    if (hours > 0 && minutes > 0) return `(${hours}시간 ${minutes}분)`;
+    if (hours > 0) return `(${hours}시간)`;
+    return `(${minutes}분)`;
   };
 
   return (
@@ -52,7 +86,18 @@ export default function SupportList({ state, actions }) {
         <GridContainer>
           {logs.map((log) => (
             <LogCard key={log.id}>
-              <CategoryBadge>{log.category}</CategoryBadge>
+              <ActionOverlay>
+                <TextActionBtn onClick={() => handleEditClick(log)}>
+                  수정
+                </TextActionBtn>
+                <TextActionBtn
+                  className="delete"
+                  onClick={() => handleDeleteLog(log.id)}
+                >
+                  삭제
+                </TextActionBtn>
+                <CatBadge>{log.category}</CatBadge>
+              </ActionOverlay>
 
               <CardHeader>
                 <CompanyText>{log.company_name}</CompanyText>
@@ -75,7 +120,10 @@ export default function SupportList({ state, actions }) {
                 <InfoRow>
                   <InfoLabel>지원 시간</InfoLabel>
                   <InfoValue>
-                    {log.start_time} ~ {log.end_time} (24h)
+                    {log.start_time} ~ {log.end_time}{" "}
+                    <DurationText>
+                      {calculateDuration(log.start_time, log.end_time)}
+                    </DurationText>
                   </InfoValue>
                 </InfoRow>
                 <Divider />
@@ -92,9 +140,65 @@ export default function SupportList({ state, actions }) {
           ))}
         </GridContainer>
       )}
+      <EditLogModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        logData={selectedLog}
+        onSave={onSaveEdit}
+        masterData={{ companies, sites, equipments }}
+      />
     </Container>
   );
 }
+const DurationText = styled.span`
+  color: #0ea5e9;
+  font-weight: 700;
+  margin-left: 4px;
+`;
+
+const ActionOverlay = styled.div`
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 8px;
+`;
+const CatBadge = styled.div`
+  background-color: #0ea5e9;
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 6px 14px;
+  border-bottom-left-radius: 12px;
+  margin-right: 4px;
+`;
+const TextActionBtn = styled.button`
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+  &.delete {
+    color: #ef4444;
+    border-color: #fca5a5;
+    background: #fef2f2;
+    &:hover {
+      background: #fee2e2;
+      color: #dc2626;
+      border-color: #f87171;
+    }
+  }
+`;
 
 const Container = styled.div`
   display: flex;

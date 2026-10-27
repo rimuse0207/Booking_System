@@ -109,7 +109,7 @@ export const ROUTES = [
     path: "/Admin/CallHistory",
     element: <AdminPage />,
     withAuthorization: true,
-    withAdminAuthorization: true,
+    withAdminAuthorization: false,
     accessCompany: ["DHKS"],
     accessDepartment: ["ALL"],
   },

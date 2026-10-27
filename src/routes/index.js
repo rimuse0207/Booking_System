@@ -28,6 +28,102 @@ const RouterMainPage = () => {
     (state) => state.Login_Info_Reducer_State.Login_Info,
   );
 
+  // const [RouterInfo, setRouterInfo] = useState([
+  //   {
+  //     path: "/Login",
+  //     element: <LoginPage></LoginPage>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/",
+  //     element: <ReservationBoard></ReservationBoard>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/Today_Food",
+  //     element: <MealPlan></MealPlan>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/FloorLayout",
+  //     element: <FloorLayout></FloorLayout>,
+  //     withAuthorization: true,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["DHKS"],
+  //   },
+  //   {
+  //     path: "/My_Pims",
+  //     element: <Schedule></Schedule>,
+  //     withAuthorization: true,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["DHKS"],
+  //   },
+  //   {
+  //     path: "/CallHistory",
+  //     element: <CallHistory></CallHistory>,
+  //     withAuthorization: true,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["DHKS"],
+  //   },
+  //   {
+  //     path: "/Admin/CallHistory",
+  //     element: <AdminPage></AdminPage>,
+  //     withAuthorization: true,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["DHKS"],
+  //   },
+
+  //   {
+  //     path: "/PartyPost",
+  //     element: <PartyPost></PartyPost>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/DHK/DHKUser",
+  //     element: <UserManagement></UserManagement>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/Vehicle/Portal",
+  //     element: <VehiclePortal></VehiclePortal>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/Vehicle/Contact/:car_Target_ID/:car_User_ID",
+  //     element: <VehicleContact></VehicleContact>,
+  //     withAuthorization: false,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  //   {
+  //     path: "/Admin/BreakFast",
+  //     element: <MealSchedule></MealSchedule>,
+  //     withAuthorization: true,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["DHKS"],
+  //   },
+
+  //   {
+  //     path: "*",
+  //     element: <Navigate to="/"></Navigate>,
+  //     withAuthorization: true,
+  //     withAdminAuthorization: false,
+  //     accessCompany: ["ALL"],
+  //   },
+  // ]);
+
   return (
     <BrowserRouter>
       <Routes>
@@ -60,6 +156,7 @@ const RouterMainPage = () => {
                     User_Info={User_Info}
                   />
                 ) : (
+                  // 권한이 없을 때 접근을 차단하고 튕겨냅니다.
                   <Navigate to="/" replace />
                 )
               }

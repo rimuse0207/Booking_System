@@ -68,10 +68,10 @@ export default function SupportForm({ state, actions }) {
           </DatePickerWrapper>
         </InputGroup>
 
-        <InputGroup>
+        {/* <InputGroup>
           <Label>대응자</Label>
           <StyledInput type="text" value={form.responder} disabled />
-        </InputGroup>
+        </InputGroup> */}
 
         <InputGroup>
           <Label>소속 팀명 (로그인 자동)</Label>
