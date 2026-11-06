@@ -59,7 +59,7 @@ export const ROUTES = [
   {
     path: "/PartyPost",
     element: <PartyPost></PartyPost>,
-    withAuthorization: true,
+    withAuthorization: false,
     withAdminAuthorization: false,
     accessCompany: ["ALL"],
     accessDepartment: ["ALL"],
@@ -94,7 +94,7 @@ export const ROUTES = [
     withAuthorization: true,
     withAdminAuthorization: false,
     accessCompany: ["DHKS"],
-    accessDepartment: ["ALL"],
+    accessDepartment: ["IT팀", "인사총무팀"],
   },
 
   {

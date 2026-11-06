@@ -54,6 +54,13 @@ export function TopMenu() {
       adminAccessCheck: false,
     },
     {
+      name: "식단표 등록",
+      path: "/Admin/Breakfast",
+      accessCompany: ["DHKS"],
+      accessDepartment: ["IT팀", "인사총무팀"],
+      adminAccessCheck: false,
+    },
+    {
       name: "사용자 관리",
       path: "/DHK/DHKUSer",
       accessCompany: ["ALL"],

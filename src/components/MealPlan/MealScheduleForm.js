@@ -3,51 +3,98 @@ import styled from "styled-components";
 
 export default function MealScheduleForm({ state, actions }) {
   return (
-    <FormWrapper onSubmit={actions.handleSubmit}>
-      <SectionCard>
-        <SectionTitle>INSERT 쿼리 직접 입력</SectionTitle>
+    <>
+      <FormWrapper onSubmit={actions.handleSubmitClick}>
+        <SectionCard>
+          <SectionTitle>INSERT 쿼리 직접 입력</SectionTitle>
+          <FormGroup>
+            <Label>SQL Query</Label>
+            <CodeTextArea
+              value={state.sqlQuery}
+              onChange={actions.handleQueryChange}
+              placeholder="여기에 데이터를 붙여넣으세요..."
+              rows={15}
+            />
+          </FormGroup>
+          <ButtonGroup>
+            <CancelButton type="button" onClick={actions.handleReset}>
+              초기화
+            </CancelButton>
+            <PrimaryBtn type="submit">쿼리 실행 및 등록</PrimaryBtn>
+          </ButtonGroup>
+        </SectionCard>
+      </FormWrapper>
 
-        {/* <InfoBox>
-          <InfoTitle>작성 가이드</InfoTitle>
-          <InfoText>
-            미리 작성된 <b>INSERT 구문</b>을 아래 텍스트 영역에 붙여넣기 하세요.
-            <br />
-            다중 INSERT 구문(여러 Row를 한 번에 삽입) 사용을 권장합니다.
-          </InfoText>
-          <ExampleCode>
-            INSERT INTO meal_schedule (date, menu, type)
-            <br />
-            VALUES <br />
-            ('2026-09-07', '백미밥, 김치찌개, 제육볶음, 계란말이, 깍두기',
-            '중식'),
-            <br />
-            ('2026-09-08', '흑미밥, 된장국, 고등어구이, 시금치나물, 배추김치',
-            '중식');
-          </ExampleCode>
-        </InfoBox> */}
+      {/* --- 이메일 인증 모달 --- */}
+      {state.isModalOpen && (
+        <ModalOverlay>
+          <ModalContent>
+            <ModalTitle>관리자 인증</ModalTitle>
+            <ModalDesc>보안을 위해 사내 이메일 인증을 진행해주세요.</ModalDesc>
 
-        <FormGroup>
-          <Label>SQL Query</Label>
-          <CodeTextArea
-            value={state.sqlQuery}
-            onChange={actions.handleQueryChange}
-            placeholder="여기에 데이터를 붙여넣으세요..."
-            rows={15}
-          />
-        </FormGroup>
+            <FormGroup style={{ marginBottom: "16px" }}>
+              <Label>이메일 아이디</Label>
+              <InputRow>
+                <EmailInputWrapper>
+                  <Input
+                    type="text"
+                    value={state.emailId}
+                    onChange={actions.handleEmailChange}
+                    placeholder="이메일 아이디"
+                    disabled={state.isCodeSent}
+                  />
+                  <DomainText>{state.DOMAIN}</DomainText>
+                </EmailInputWrapper>
+                <AuthBtn
+                  type="button"
+                  onClick={actions.handleSendCode}
+                  disabled={state.isCodeSent && state.timeLeft !== "00:00"}
+                >
+                  {state.isCodeSent ? "재발송" : "코드 발송"}
+                </AuthBtn>
+              </InputRow>
+            </FormGroup>
 
-        <ButtonGroup>
-          <CancelButton type="button" onClick={actions.handleReset}>
-            초기화
-          </CancelButton>
-          <PrimaryBtn type="submit">쿼리 실행 및 등록</PrimaryBtn>
-        </ButtonGroup>
-      </SectionCard>
-    </FormWrapper>
+            {state.isCodeSent && (
+              <FormGroup>
+                <Label>인증 번호 (6자리)</Label>
+                <InputRow>
+                  <CodeInputWrapper>
+                    <Input
+                      type="text"
+                      maxLength={6}
+                      value={state.authCode}
+                      onChange={actions.handleCodeChange}
+                      placeholder="000000"
+                    />
+                    <TimerText isDanger={state.timeLeft === "00:00"}>
+                      {state.timeLeft}
+                    </TimerText>
+                  </CodeInputWrapper>
+                </InputRow>
+              </FormGroup>
+            )}
+
+            <ButtonGroup style={{ marginTop: "32px" }}>
+              <CancelButton type="button" onClick={actions.closeModal}>
+                취소
+              </CancelButton>
+              <PrimaryBtn
+                type="button"
+                onClick={actions.handleVerifyAndSubmit}
+                disabled={!state.isCodeSent}
+              >
+                인증 및 전송
+              </PrimaryBtn>
+            </ButtonGroup>
+          </ModalContent>
+        </ModalOverlay>
+      )}
+    </>
   );
 }
 
-// --- Styled Components ---
+// --- 기존 Styled Components (생략: 위에서 제공하신 코드 유지) ---
 const FormWrapper = styled.form`
   display: flex;
   flex-direction: column;
@@ -76,35 +123,6 @@ const SectionTitle = styled.h3`
     background-color: #0ea5e9;
     border-radius: 2px;
   }
-`;
-const InfoBox = styled.div`
-  background-color: #f0f9ff;
-  border: 1px dashed #7dd3fc;
-  border-radius: 8px;
-  padding: 16px 20px;
-  margin-bottom: 24px;
-`;
-const InfoTitle = styled.div`
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: #0369a1;
-  margin-bottom: 8px;
-`;
-const InfoText = styled.div`
-  font-size: 0.85rem;
-  color: #0c4a6e;
-  line-height: 1.5;
-  margin-bottom: 12px;
-`;
-const ExampleCode = styled.div`
-  background-color: #1e293b;
-  color: #e2e8f0;
-  padding: 12px;
-  border-radius: 6px;
-  font-family: "D2Coding", "Fira Code", Consolas, monospace;
-  font-size: 0.85rem;
-  line-height: 1.4;
-  overflow-x: auto;
 `;
 const FormGroup = styled.div`
   display: flex;
@@ -178,5 +196,120 @@ const PrimaryBtn = styled.button`
   }
   &:active {
     transform: translateY(0);
+  }
+  &:disabled {
+    background-color: #94a3b8;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+`;
+
+// --- 모달 전용 Styled Components 추가 ---
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+`;
+const ModalContent = styled.div`
+  background-color: white;
+  padding: 32px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+`;
+const ModalTitle = styled.h3`
+  margin: 0 0 8px 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+`;
+const ModalDesc = styled.p`
+  margin: 0 0 24px 0;
+  font-size: 0.9rem;
+  color: #64748b;
+`;
+const InputRow = styled.div`
+  display: flex;
+  gap: 8px;
+`;
+const Input = styled.input`
+  flex: 1;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  outline: none;
+  &:focus {
+    border-color: #0ea5e9;
+  }
+  &:disabled {
+    background-color: #f1f5f9;
+    color: #94a3b8;
+  }
+`;
+const EmailInputWrapper = styled.div`
+  display: flex;
+  flex: 1;
+  align-items: center;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  overflow: hidden;
+  &:focus-within {
+    border-color: #0ea5e9;
+  }
+  ${Input} {
+    border: none;
+    border-radius: 0;
+  }
+`;
+const DomainText = styled.span`
+  background-color: #f8fafc;
+  padding: 0 12px;
+  color: #64748b;
+  font-size: 0.9rem;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  border-left: 1px solid #cbd5e1;
+`;
+const CodeInputWrapper = styled.div`
+  position: relative;
+  width: 100%;
+`;
+const TimerText = styled.span`
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: ${(props) => (props.isDanger ? "#ef4444" : "#0ea5e9")};
+`;
+const AuthBtn = styled.button`
+  background-color: #f8fafc;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 0 16px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  white-space: nowrap;
+  &:hover:not(:disabled) {
+    background-color: #e2e8f0;
+  }
+  &:disabled {
+    color: #94a3b8;
+    cursor: not-allowed;
   }
 `;
